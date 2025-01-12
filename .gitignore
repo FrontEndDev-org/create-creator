@@ -1,0 +1,40 @@
+# Macos
+.DS_Store
+
+# Windows
+$RECYCLE.BIN/
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
+# Node
+node_modules
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+/logs
+*.log
+*.log.*
+
+# Editor directories and files
+.idea
+.vscode
+.history
+!.vscode/extensions.json
+
+# dist and cache
+/dist
+/dist-*
+/dist_*
+.cache
+
+# testing
+/coverage
+
+# typescript
+*.tsbuildinfo
+
+

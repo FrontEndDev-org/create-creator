@@ -1,0 +1,53 @@
+{
+  "name": "create-creator",
+  "version": "1.0.0",
+  "description": "Create a scaffolding constructor - npm create creator",
+  "scripts": {
+    "prepare": "lefthook install",
+    "check": "biome check --write",
+    "build": "NODE_ENV=production vite build"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "bin": "./dist/cli.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "templates"],
+  "keywords": [],
+  "author": "云淡然 <hi@ydr.me> (https://ydr.me)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frontenddev-org/create-fa.git"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "ejs": "^3.1.10",
+    "fs-extra": "^11.2.0",
+    "glob": "^11.0.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.2",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/types": "^19.5.0",
+    "@types/ejs": "^3.1.5",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.10.5",
+    "lefthook": "^1.10.3",
+    "taze": "^18.1.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
+    "vite-plugin-dts": "^4.5.0",
+    "vite-plugin-externalize-deps": "^0.8.0",
+    "vitest": "^2.1.8"
+  }
+}
