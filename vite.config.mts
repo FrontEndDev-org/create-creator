@@ -39,7 +39,6 @@ export default defineConfig((env) => {
       lib: {
         entry: {
           index: 'src/index.ts',
-          cli: 'src/cli.ts',
         },
       },
       rollupOptions: {
