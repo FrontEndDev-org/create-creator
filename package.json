@@ -5,11 +5,12 @@
   "scripts": {
     "prepare": "lefthook install",
     "check": "biome check --write",
-    "build": "NODE_ENV=production vite build"
+    "build": "NODE_ENV=production vite build",
+    "test": "vitest run"
   },
   "sideEffects": false,
   "main": "./dist/index.cjs",
-  "bin": "./dist/cli.cjs",
+  "bin": "./bin/index.cjs",
   "module": "./dist/index.mjs",
   "exports": {
     ".": {
