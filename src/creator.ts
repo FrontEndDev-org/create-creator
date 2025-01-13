@@ -5,6 +5,7 @@ import * as prompts from '@clack/prompts';
 import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
+import { isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
 export type WriteMode = 'overwrite' | 'clean' | 'cancel';
@@ -88,13 +89,13 @@ class Creator<T extends Record<string, unknown>> {
   data: CreatorData<T>;
   constructor(private readonly options: CreatorOptions<T>) {
     const cwd = normalizePath(options.cwd || process.cwd());
-    const projectPath = options.projectPath || '.';
+    const projectRoot = normalizePath(path.resolve(cwd, options.projectPath || '.'));
     const { context } = this;
 
     context.cwd = cwd;
-    context.templatesRoot = normalizePath(options.templatesRoot);
-    context.projectRoot = normalizePath(path.join(cwd, projectPath));
-    context.projectPath = normalizePath(projectPath);
+    context.templatesRoot = normalizePath(path.resolve(cwd, options.templatesRoot));
+    context.projectRoot = projectRoot;
+    context.projectPath = normalizePath(path.relative(cwd, projectRoot));
     context.projectName = path.basename(context.projectRoot);
 
     this.data = { ctx: context } as CreatorData<T>;
@@ -240,8 +241,14 @@ class Creator<T extends Record<string, unknown>> {
 
   async start() {
     const { context, options } = this;
+
+    if (isDirectory(context.templatesRoot) === false) {
+      prompts.cancel(`Templates root directory ${context.templatesRoot} does not exist`);
+      process.exit(1);
+    }
+
     const templateNames = fs
-      .readdirSync(options.templatesRoot)
+      .readdirSync(context.templatesRoot)
       .filter((name) => !name.startsWith('.') && !name.startsWith('_'));
 
     if (templateNames.length === 0) {
@@ -260,7 +267,7 @@ class Creator<T extends Record<string, unknown>> {
               label: name,
             })),
           })) as string);
-    context.templateRoot = normalizePath(path.join(options.templatesRoot, context.templateName));
+    context.templateRoot = normalizePath(path.join(context.templatesRoot, context.templateName));
 
     await this.#check();
     await this.#extend();
