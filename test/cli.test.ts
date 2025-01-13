@@ -36,7 +36,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.resetAllMocks();
-  // fs.rmSync(tempDir, { recursive: true });
+  fs.rmSync(tempDir, { recursive: true });
 });
 
 it('创建新脚手架 + eslint', async () => {
