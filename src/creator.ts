@@ -413,6 +413,6 @@ class Creator<T extends Record<string, unknown>> {
  * @param {CreatorOptions<T>} options - Configuration options
  * @returns {Promise<void>}
  */
-export async function buildCreator<T extends Record<string, unknown>>(options: CreatorOptions<T>) {
+export async function createCreator<T extends Record<string, unknown>>(options: CreatorOptions<T>) {
   await new Creator<T>(options).start();
 }
