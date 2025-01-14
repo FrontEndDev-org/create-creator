@@ -23,7 +23,10 @@
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
-  "files": ["dist", "templates"],
+  "files": [
+    "dist",
+    "templates"
+  ],
   "keywords": [],
   "author": "云淡然 <hi@ydr.me> (https://ydr.me)",
   "license": "MIT",
