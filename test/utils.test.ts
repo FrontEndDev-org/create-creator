@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { isDirectory } from '../src/utils';
+import { isDirectory, isFile } from '../src/utils';
 
 let tempDir: string;
 let testFile: string;
@@ -36,4 +36,16 @@ it('should return false for file', () => {
 
 it('should return false for non-existent path', () => {
   expect(isDirectory(path.join(tempDir, 'non-existent'))).toBe(false);
+});
+
+it('should return true for file', () => {
+  expect(isFile(testFile)).toBe(true);
+});
+
+it('should return false for directory', () => {
+  expect(isFile(testDir)).toBe(false);
+});
+
+it('should return false for non-existent path', () => {
+  expect(isFile(path.join(tempDir, 'non-existent'))).toBe(false);
 });
