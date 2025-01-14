@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import * as clackPrompts from '@clack/prompts';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { buildCreator } from '../src';
+import { createCreator } from '../src';
 import * as prompts from '../src/prompts';
 
 vi.mock('@clack/prompts');
@@ -58,7 +58,7 @@ it('调用 onStart onEnd', async () => {
   const mockOnStart = vi.fn();
   const mockOnEnd = vi.fn();
 
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     projectPath: projectRoot,
     onStart: mockOnStart,
@@ -74,7 +74,7 @@ it('空目录', async () => {
   fs.mkdirSync(emptyTemplatesRoot);
 
   await expect(
-    buildCreator({
+    createCreator({
       templatesRoot: emptyTemplatesRoot,
       projectPath: projectRoot,
     }),
@@ -84,7 +84,7 @@ it('空目录', async () => {
 it('覆盖模式', async () => {
   fs.writeFileSync(path.join(projectRoot, 'test.txt'), 'old content');
 
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     projectPath: projectRoot,
   });
@@ -101,7 +101,7 @@ it('清空模式', async () => {
 
   vi.spyOn(clackPrompts, 'select').mockResolvedValue('clean');
 
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     projectPath: projectRoot,
   });
@@ -118,7 +118,7 @@ it('取消模式', async () => {
   fs.writeFileSync(path.join(projectRoot, 'existing.txt'), 'old content');
 
   await expect(
-    buildCreator({
+    createCreator({
       templatesRoot,
       projectPath: projectRoot,
     }),
@@ -128,7 +128,7 @@ it('取消模式', async () => {
 });
 
 it('EJS 文件渲染', async () => {
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     projectPath: projectRoot,
   });
@@ -143,7 +143,7 @@ it('自定义扩展数据', async () => {
 
   fs.writeFileSync(path.join(templateRoot, 'test.txt.ejs'), '<%= customValue %>');
 
-  await buildCreator({
+  await createCreator({
     cwd: tempDir,
     templatesRoot,
     extendData: mockExtendData,
@@ -159,7 +159,7 @@ it('自定义扩展数据', async () => {
 it('支持写入前判断', async () => {
   const mockCanWrite = vi.fn().mockReturnValue(false);
 
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     canWrite: mockCanWrite,
     projectPath: projectRoot,
@@ -172,7 +172,7 @@ it('支持写入前判断', async () => {
 it('自定义写入方法', async () => {
   const mockDoWrite = vi.fn();
 
-  await buildCreator({
+  await createCreator({
     templatesRoot,
     doWrite: mockDoWrite,
   });
