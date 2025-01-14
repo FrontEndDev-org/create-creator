@@ -1,0 +1,1 @@
+这个项目的脚手架是使用 [create-creator](https://github.com/FrontEndDev-org/create-creator) 创建出来的。
