@@ -1,18 +1,24 @@
 import path from 'node:path';
 import process from 'node:process';
-import { buildCreator, selectLinter, selectNodeVersion, selectNpmRegistry } from '.';
+import { pkgDescription, pkgName, pkgVersion } from './const';
+import { buildCreator } from './creator';
+import { selectLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
+
+const disableWrites = {
+  eslint: ['biome'],
+  biome: ['eslint', 'prettier'],
+};
 
 export async function createCLI() {
   return buildCreator({
     projectPath: process.argv[2],
-    templatesRoot: path.join(__dirname, '..', 'templates'),
-    onStart({ prompts, ...context }) {
-      prompts.intro('🚀');
-      prompts.log.info('Welcome to create a creator!');
+    templatesRoot: path.join(__dirname, '../templates'),
+    onStart({ prompts }) {
+      prompts.intro(`${pkgName}@${pkgVersion}`);
+      prompts.log.info(pkgDescription);
     },
-    onEnd({ prompts, ...context }) {
-      prompts.log.success('Successful creation!');
-      prompts.outro('🎉');
+    onEnd({ prompts }) {
+      prompts.outro('🎉🎉🎉');
     },
     async extendData({ prompts }) {
       const nodeVersion = await selectNodeVersion();
@@ -26,7 +32,11 @@ export async function createCLI() {
       };
     },
     canWrite(meta, data) {
-      console.log(meta);
+      const disables = disableWrites[data.linter as keyof typeof disableWrites];
+      const targetName = path.basename(meta.targetPath);
+
+      if (disables.some((d) => targetName.includes(d))) return false;
+
       return true;
     },
   });
