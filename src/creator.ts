@@ -29,13 +29,16 @@ export type CreatorBuiltinData = {
 
 export type CreatorData<T> = CreatorBuiltinData & T;
 
-export type WriteKind = 'underscore' | 'ejs' | 'dot' | 'original';
 export type WriteMeta = {
-  kind: WriteKind;
+  isEjsFile: boolean;
+  isUnderscoreFile: boolean;
+  isDotFile: boolean;
   sourceFile: string;
   sourcePath: string;
+  sourceRoot: string;
   targetFile: string;
   targetPath: string;
+  targetRoot: string;
 };
 
 export type CreatorOptions<T> = {
@@ -197,29 +200,31 @@ class Creator<T extends Record<string, unknown>> {
       let start = 0;
       let end = undefined;
       let prefix = '';
-      let kind: WriteKind = 'original';
 
       if (isEjsFile) {
         end = -EJS_FILE_SUFFIX.length;
-        kind = 'ejs';
-      } else if (isUnderscoreFile) {
+      }
+
+      if (isUnderscoreFile) {
         start = UNDERSCORE_FILE_PREFIX.length;
-        kind = 'underscore';
         prefix = '_';
       } else if (isDotFile) {
         start = DOT_FILE_PREFIX.length;
-        kind = 'dot';
         prefix = '.';
       }
 
       const targetPath = normalizePath(path.join(fileFolder, prefix + fileName.slice(start, end)));
       const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
       const writeMeta: WriteMeta = {
-        kind,
+        isDotFile,
+        isEjsFile,
+        isUnderscoreFile,
         sourcePath,
         sourceFile,
+        sourceRoot: context.templateRoot,
         targetPath,
         targetFile,
+        targetRoot: context.projectRoot,
       };
 
       if (options.canWrite?.call(null, writeMeta, this.data) === false) {
