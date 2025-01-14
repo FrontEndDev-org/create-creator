@@ -6,7 +6,7 @@ import * as clackPrompts from '@clack/prompts';
 import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import { createCLI, selectLinter, selectNodeVersion, selectNpmRegistry } from '../src';
 import * as prompts from '../src/prompts.ts';
-import { isDirectory } from '../src/utils.ts';
+import { isDirectory, isFile } from '../src/utils.ts';
 
 let tempDir = '';
 const cwd = process.cwd();
@@ -14,6 +14,9 @@ const argv = process.argv;
 const nodeVersion = Math.random();
 const npmRegistry = Math.random().toString();
 const projectName = Math.random().toString();
+
+const toAbs = (p: string) => path.join(tempDir, projectName, p);
+const readFile = (p: string) => fs.readFileSync(toAbs(p), 'utf-8');
 
 beforeAll(() => {
   vi.mock('@clack/prompts');
@@ -46,7 +49,14 @@ it('创建新脚手架 + eslint', async () => {
 
   await createCLI();
 
-  expect(isDirectory(path.join(tempDir, projectName))).toBeTruthy();
+  expect(isDirectory(toAbs('.'))).toBeTruthy();
+  expect(isFile(toAbs('biome.jsonc'))).toBeFalsy();
+  expect(isFile(toAbs('eslint.config.mjs'))).toBeTruthy();
+  expect(isFile(toAbs('prettier.config.mjs'))).toBeTruthy();
+  expect(isFile(toAbs('.prettierignore'))).toBeTruthy();
+  expect(readFile('.nvmrc').trim()).toEqual(nodeVersion.toString());
+  expect(readFile('.npmrc')).toMatch(`registry=${npmRegistry}`);
+  expect(readFile('README.md')).toMatch(`# ${projectName}`);
 });
 
 it('创建新脚手架 + biome', async () => {
@@ -56,5 +66,12 @@ it('创建新脚手架 + biome', async () => {
 
   await createCLI();
 
-  expect(isDirectory(path.join(tempDir, projectName))).toBeTruthy();
+  expect(isDirectory(toAbs('.'))).toBeTruthy();
+  expect(isFile(toAbs('biome.jsonc'))).toBeTruthy();
+  expect(isFile(toAbs('eslint.config.mjs'))).toBeFalsy();
+  expect(isFile(toAbs('prettier.config.mjs'))).toBeFalsy();
+  expect(isFile(toAbs('.prettierignore'))).toBeFalsy();
+  expect(readFile('.nvmrc').trim()).toEqual(nodeVersion.toString());
+  expect(readFile('.npmrc')).toMatch(`registry=${npmRegistry}`);
+  expect(readFile('README.md')).toMatch(`# ${projectName}`);
 });
