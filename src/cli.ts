@@ -1,7 +1,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { pkgDescription, pkgName, pkgVersion } from './const';
-import { buildCreator } from './creator';
+import { createCreator } from './creator';
 import { selectLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 
 const disableWrites = {
@@ -10,7 +10,7 @@ const disableWrites = {
 };
 
 export async function createCLI() {
-  return buildCreator({
+  return createCreator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
     onStart({ prompts, colors }) {
