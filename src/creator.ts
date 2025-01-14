@@ -5,9 +5,11 @@ import * as prompts from '@clack/prompts';
 import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
+import * as colors from 'picocolors';
 import { isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
+export type Colors = typeof colors;
 export type WriteMode = 'overwrite' | 'clean' | 'cancel';
 
 export type CreatorContext = {
@@ -19,6 +21,7 @@ export type CreatorContext = {
   projectPath: string;
   projectName: string;
   prompts: Prompts;
+  colors: Colors;
   writeMode: WriteMode;
 };
 
@@ -87,6 +90,7 @@ class Creator<T extends Record<string, unknown>> {
     projectPath: '',
     projectName: '',
     prompts,
+    colors,
     writeMode: 'cancel',
   };
   data: CreatorData<T>;
@@ -113,7 +117,7 @@ class Creator<T extends Record<string, unknown>> {
       })
       .filter((n) => !ignoreFiles.includes(n));
 
-    prompts.log.warn(`The project directory is: ${context.projectRoot}`);
+    prompts.log.warn(`The project directory is: ${colors.yellowBright(context.projectRoot)}`);
 
     if (files.length === 0) {
       return;

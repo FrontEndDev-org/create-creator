@@ -13,8 +13,8 @@ export async function createCLI() {
   return buildCreator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
-    onStart({ prompts }) {
-      prompts.intro(`${pkgName}@${pkgVersion}`);
+    onStart({ prompts, colors }) {
+      prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
       prompts.log.info(pkgDescription);
     },
     onEnd({ prompts }) {
