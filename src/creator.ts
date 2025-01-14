@@ -113,12 +113,14 @@ class Creator<T extends Record<string, unknown>> {
       })
       .filter((n) => !ignoreFiles.includes(n));
 
+    prompts.log.warn(`The project directory is: ${context.projectRoot}`);
+
     if (files.length === 0) {
       return;
     }
 
     const writeMode = await prompts.select({
-      message: `The project directory ${context.projectRoot} already exists. Pick an action`,
+      message: 'The project directory already exists. Pick an action',
       options: [
         {
           value: 'overwrite',
