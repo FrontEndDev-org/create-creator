@@ -51,11 +51,11 @@ export type CreatorContext = {
    */
   projectName: string;
   /**
-   * CLI prompts instance
+   * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
    */
   prompts: Prompts;
   /**
-   * Color utilities instance
+   * Color utilities instance @see https://www.npmjs.com/package/picocolors
    */
   colors: Colors;
   /**
@@ -188,7 +188,7 @@ class Creator<T extends Record<string, unknown>> {
     projectName: '',
     prompts,
     colors,
-    writeMode: 'cancel',
+    writeMode: undefined,
   };
   data: CreatorData<T>;
 
@@ -204,7 +204,7 @@ class Creator<T extends Record<string, unknown>> {
     context.cwd = cwd;
     context.templatesRoot = normalizePath(path.resolve(cwd, options.templatesRoot));
     context.projectRoot = projectRoot;
-    context.projectPath = normalizePath(path.relative(cwd, projectRoot));
+    context.projectPath = normalizePath(path.relative(cwd, projectRoot)) || '.';
     context.projectName = path.basename(context.projectRoot);
 
     this.data = { ctx: context } as CreatorData<T>;
