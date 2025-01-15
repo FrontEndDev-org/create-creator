@@ -17,7 +17,9 @@ export async function createCLI() {
       prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
       prompts.log.info(pkgDescription);
     },
-    onEnd({ prompts }) {
+    onEnd({ prompts, colors, cwd, projectRoot }) {
+      const relativeTo = path.relative(cwd, projectRoot);
+      prompts.log.success(`${colors.bold(colors.greenBright(`cd ${relativeTo}`))} to start your coding journey`);
       prompts.outro('🎉🎉🎉');
     },
     async extendData({ prompts }) {
