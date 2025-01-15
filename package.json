@@ -27,7 +27,7 @@
     "dist",
     "templates"
   ],
-  "keywords": [],
+  "keywords": ["create-creator"],
   "author": "云淡然 <hi@ydr.me> (https://ydr.me)",
   "license": "MIT",
   "repository": {
