@@ -5,6 +5,7 @@ import * as clackPrompts from '@clack/prompts';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createCreator } from '../src';
 import * as prompts from '../src/prompts';
+import { isDirectory, isFile } from '../src/utils';
 import { runTest } from './helpers';
 
 let templatesRoot: string;
@@ -89,7 +90,6 @@ it('覆盖模式', async () => {
       templatesRoot,
     });
 
-    console.log(fs.readdirSync(cwd));
     // 验证文件被覆盖
     const content = fs.readFileSync(path.join(cwd, 'test.txt'), 'utf8');
     expect(content).toMatch(/Hello/);
