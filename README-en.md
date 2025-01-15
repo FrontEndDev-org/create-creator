@@ -128,7 +128,7 @@ export async function createCLI() {
 
 ### `createCreator<T>(options: CreatorOptions<T>): Promise<void>`
 
-The main function to create a new project creator.
+create a new project creator.
 
 ### `CreatorOptions<T>`
 ```ts
