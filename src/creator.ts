@@ -51,6 +51,10 @@ export type CreatorContext = {
    */
   projectName: string;
   /**
+   * Name of package being created
+   */
+  packageName: string;
+  /**
    * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
    */
   prompts: Prompts;
@@ -186,6 +190,7 @@ class Creator<T extends Record<string, unknown>> {
     projectRoot: '',
     projectPath: '',
     projectName: '',
+    packageName: '',
     prompts,
     colors,
     writeMode: 'cancel',
@@ -206,6 +211,9 @@ class Creator<T extends Record<string, unknown>> {
     context.projectRoot = projectRoot;
     context.projectPath = normalizePath(path.relative(cwd, projectRoot)) || '.';
     context.projectName = path.basename(context.projectRoot);
+    context.packageName = context.projectName.startsWith('create-')
+      ? context.projectName
+      : `create-${context.projectName}`;
 
     this.data = { ctx: context } as CreatorData<T>;
   }
