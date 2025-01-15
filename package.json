@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "lefthook install",
     "lint": "biome check",
-    "lint:fix": "biome check --write",
+    "lint:fix": "biome check --fix",
     "build": "NODE_ENV=production vite build",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"

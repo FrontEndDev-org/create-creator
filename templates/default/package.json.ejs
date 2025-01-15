@@ -6,7 +6,7 @@
     "prepare": "lefthook install",
     <%_ if (codeLinter === 'biome') { _%>
     "lint": "biome check",
-    "lint:fix": "biome check --write",
+    "lint:fix": "biome check --fix",
     <%_ } else if (codeLinter === 'eslint') { _%>
     "lint": "eslint",
     "lint:fix": "eslint --fix",
