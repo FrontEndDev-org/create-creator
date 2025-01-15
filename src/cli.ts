@@ -2,7 +2,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { pkgDescription, pkgName, pkgVersion } from './const';
 import { createCreator } from './creator';
-import { selectLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
+import { selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 
 const disableWrites = {
   eslint: ['biome'],
@@ -23,16 +23,16 @@ export async function createCLI() {
     async extendData({ prompts }) {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
-      const linter = await selectLinter();
+      const codeLinter = await selectCodeLinter();
 
       return {
         nodeVersion,
         npmRegistry,
-        linter,
+        codeLinter,
       };
     },
     canWrite(meta, data) {
-      const disables = disableWrites[data.linter as keyof typeof disableWrites];
+      const disables = disableWrites[data.codeLinter as keyof typeof disableWrites];
       const targetName = path.basename(meta.targetPath);
 
       if (disables.some((d) => targetName.includes(d))) return false;

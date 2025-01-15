@@ -1,6 +1,6 @@
 import * as prompts from '@clack/prompts';
 import { describe, expect, it, vi } from 'vitest';
-import { selectLinter, selectNodeVersion, selectNpmRegistry } from '../src/prompts';
+import { selectCodeLinter, selectNodeVersion, selectNpmRegistry } from '../src/prompts';
 
 vi.mock('@clack/prompts');
 
@@ -33,13 +33,13 @@ it('should select npm registry', async () => {
   });
 });
 
-it('should select linter', async () => {
+it('should select code linter', async () => {
   vi.spyOn(prompts, 'select').mockResolvedValue('eslint');
 
-  const linter = await selectLinter();
-  expect(linter).toBe('eslint');
+  const codeLinter = await selectCodeLinter();
+  expect(codeLinter).toBe('eslint');
   expect(prompts.select).toHaveBeenCalledWith({
-    message: 'Select linter',
+    message: 'Select code linter',
     options: expect.arrayContaining([
       expect.objectContaining({ value: 'eslint' }),
       expect.objectContaining({ value: 'biome' }),

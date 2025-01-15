@@ -4,10 +4,10 @@
   "description": "Create a scaffolding constructor - npm create creator",
   "scripts": {
     "prepare": "lefthook install",
-    <%_ if (linter === 'biome') { _%>
+    <%_ if (codeLinter === 'biome') { _%>
     "lint": "biome check",
     "lint:fix": "biome check --write",
-    <%_ } else if (linter === 'eslint') { _%>
+    <%_ } else if (codeLinter === 'eslint') { _%>
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     <%_ } _%>
@@ -37,9 +37,9 @@
     "create-creator": "^1.0.0"
   },
   "devDependencies": {
-    <%_ if (linter === 'biome') { _%>
+    <%_ if (codeLinter === 'biome') { _%>
     "@biomejs/biome": "1.9.2",
-    <%_ } else if (linter === 'eslint') { _%>
+    <%_ } else if (codeLinter === 'eslint') { _%>
     "@antfu/eslint-config": "^3.12.1",
     "eslint": "^9.17.0",
     "prettier": "^3.4.2",

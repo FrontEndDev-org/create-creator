@@ -6,9 +6,9 @@ pre-commit:
   commands:
     lint:
       glob: "*"
-      <%_ if (linter === 'biome') { _%>
+      <%_ if (codeLinter === 'biome') { _%>
       run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
-      <%_ } else if (linter === 'eslint') { _%>
+      <%_ } else if (codeLinter === 'eslint') { _%>
       run: npx eslint --no-error-on-unmatched-pattern --no-color --fix {staged_files}
       <%_ } _%>
       stage_fixed: true

@@ -4,7 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import * as clackPrompts from '@clack/prompts';
 import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest';
-import { createCLI, selectLinter, selectNodeVersion, selectNpmRegistry } from '../src';
+import { createCLI, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from '../src';
 import * as prompts from '../src/prompts.ts';
 import { isDirectory, isFile } from '../src/utils.ts';
 
@@ -38,7 +38,7 @@ it('创建新脚手架 + eslint', async () => {
     const readFile = (p: string) => fs.readFileSync(toAbs(p), 'utf-8');
 
     process.chdir(tempDir);
-    vi.spyOn(prompts, 'selectLinter').mockResolvedValue('eslint');
+    vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('eslint');
 
     await createCLI();
 
@@ -63,7 +63,7 @@ it('创建新脚手架 + biome', async () => {
     const readFile = (p: string) => fs.readFileSync(toAbs(p), 'utf-8');
 
     process.chdir(tempDir);
-    vi.spyOn(prompts, 'selectLinter').mockResolvedValue('biome');
+    vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('biome');
 
     await createCLI();
 

@@ -45,7 +45,7 @@ beforeEach(() => {
   vi.spyOn(clackPrompts, 'select').mockResolvedValue('overwrite');
   vi.spyOn(prompts, 'selectNodeVersion').mockResolvedValue(nodeVersion);
   vi.spyOn(prompts, 'selectNpmRegistry').mockResolvedValue(npmRegistry);
-  vi.spyOn(prompts, 'selectLinter').mockResolvedValue(linter);
+  vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue(linter);
 });
 
 afterEach(() => {

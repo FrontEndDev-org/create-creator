@@ -38,10 +38,10 @@ export async function selectNpmRegistry(
   );
 }
 
-export async function selectLinter(linters: string[] = ['eslint', 'biome']) {
+export async function selectCodeLinter(linters: string[] = ['eslint', 'biome']) {
   return promptsSafe(
     prompts.select({
-      message: 'Select linter',
+      message: 'Select code linter',
       options: linters.map((v) => ({
         value: v,
         label: v,
