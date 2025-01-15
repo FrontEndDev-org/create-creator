@@ -1,6 +1,7 @@
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
+import type { WriteMode } from './creator';
 
 export async function promptsSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
@@ -70,7 +71,7 @@ const IGNORE_NAMES = [
   '.vscode',
 ];
 
-export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES) {
+export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): Promise<WriteMode> {
   const files = glob
     .sync('*', {
       cwd: cwd,
@@ -81,7 +82,7 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES) {
   prompts.log.warn(`The project directory is: ${colors.yellowBright(cwd)}`);
 
   if (files.length === 0) {
-    return;
+    return 'overwrite';
   }
 
   return promptsSafe(

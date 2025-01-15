@@ -61,7 +61,7 @@ export type CreatorContext = {
   /**
    * Current write mode (overwrite/clean/cancel)
    */
-  writeMode?: WriteMode;
+  writeMode: WriteMode;
 };
 
 const builtinDataKey = 'ctx';
@@ -188,7 +188,7 @@ class Creator<T extends Record<string, unknown>> {
     projectName: '',
     prompts,
     colors,
-    writeMode: undefined,
+    writeMode: 'cancel',
   };
   data: CreatorData<T>;
 
