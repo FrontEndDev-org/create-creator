@@ -210,6 +210,10 @@ export type CreatorContext = {
    */
   projectName: string;
   /**
+   * Name of package being created
+   */
+  packageName: string;
+  /**
    * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
    */
   prompts: Prompts;
