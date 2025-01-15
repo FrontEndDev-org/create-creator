@@ -1,4 +1,4 @@
-[➡️ English](./README-en.md)
+[➡️ 中文](./README.md)
 
 # create-creator
 
@@ -10,26 +10,26 @@
 
 Create a creator.
 
-## 功能特性
+## Features
 
-- 🗝 简单易用，简洁设计
-- 🛠️ 基于模板的项目生成
-- ⚙️ 交互式 CLI 配置
-- 📦 支持多个模板
-- 🧩 EJS 模板渲染
+- 🗝 Simple and easy to use, concise design
+- 🛠️ Template-based project generation
+- ⚙️ Interactive CLI prompts for configuration
+- 📦 Supports multiple templates
+- 🧩 EJS template rendering
 
-## 安装与使用
+## Installation & Usage
 
 ```bash
 npm create creator my-creator
 ```
 
-- 打开 `src/cli.ts` 自定义创建逻辑
-- 打开 `src/templates` 编写模板文件
+- Open `src/cli.ts` to customize project creation logic
+- Open `src/templates` to start writing template files
 
-## 示例
+## Examples
 
-### 扩展自定义数据
+### Extending Custom Data
 
 ```ts
 // src/cli.ts
@@ -55,7 +55,7 @@ Created by: <%= author %>
 Created at: <%= timestamp %>
 ```
 
-### 根据条件渲染不同模板文件
+### Conditional Template Rendering
 
 ```ts
 // src/cli.ts
@@ -77,7 +77,7 @@ export async function createCLI() {
 }
 ```
 
-### 打印写入文件日志
+### Logging File Writes
 
 ```ts
 // src/cli.ts
@@ -91,7 +91,8 @@ export async function createCLI() {
 }
 ```
 
-### 自定义命令行选择交互
+### Custom CLI Selection
+
 ```ts
 // src/cli.ts
 import { promptsSafe } from 'create-creator';
@@ -122,7 +123,6 @@ export async function createCLI() {
   });
 }
 ```
-
 
 ## API
 
@@ -280,17 +280,31 @@ export type CreatorData<T> = {
 } & T;
 ```
 
+### Template Variables
+
+The following variables are available in EJS templates:
+
+- `ctx`: The creation context (`CreatorContext`)
+- Custom data returned from `extendData: () => ({ timestamp: Date.now() })`
+
+Example template (README.md.ejs):
+```ejs
+# <%= ctx.projectName %>
+
+Created at: <%= timestamp %>
+```
+
 ### `selectNodeVersion(versions?: number[]): Promise<number>`
-命令行交互选择 node 版本。
+Interactive CLI selection for Node.js version.
 
 ### `selectNpmRegistry(registries?: string[]): Promise<string>`
-命令行交互选择 npm 仓库地址。
+Interactive CLI selection for npm registry.
 
 ### `selectCodeLinter(linters?: string[]): Promise<string>`
-命令行交互选择代码格式化工具。
+Interactive CLI selection for code linter/formatter.
 
 ### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
-命令行交互选择当目录不为空时文件的写入模式。
+Interactive CLI selection for file write mode when directory is not empty.
 
 ## License
 
