@@ -6,6 +6,7 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
+import { selectWriteMode } from './prompts';
 import { isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
@@ -60,7 +61,7 @@ export type CreatorContext = {
   /**
    * Current write mode (overwrite/clean/cancel)
    */
-  writeMode: WriteMode;
+  writeMode?: WriteMode;
 };
 
 const builtinDataKey = 'ctx';
@@ -172,24 +173,6 @@ const DOT_FILE_PREFIX = '_';
 const EJS_FILE_SUFFIX = '.ejs';
 const EJS_FILE_REGEX = /\.ejs$/i;
 
-const ignoreFiles = [
-  // # Macos
-  '.DS_Store',
-
-  // # Windows
-  '$RECYCLE.BIN',
-  'Desktop.ini',
-  'ehthumbs.db',
-  'Thumbs.db',
-
-  // # git
-  '.git',
-
-  // # Editor directories and files
-  '.idea',
-  '.vscode',
-];
-
 /**
  * Main class for handling project creation
  * @template T - Type of custom data to extend with
@@ -229,45 +212,9 @@ class Creator<T extends Record<string, unknown>> {
 
   async #check() {
     const { context, options } = this;
-    const files = glob
-      .sync('*', {
-        cwd: context.projectRoot,
-        nodir: false,
-      })
-      .filter((n) => !ignoreFiles.includes(n));
+    context.writeMode = await selectWriteMode(context.projectRoot);
 
-    prompts.log.warn(`The project directory is: ${colors.yellowBright(context.projectRoot)}`);
-
-    if (files.length === 0) {
-      return;
-    }
-
-    const writeMode = await prompts.select({
-      message: 'The project directory already exists. Pick an action',
-      options: [
-        {
-          value: 'overwrite',
-          label: 'Overwrite existing files',
-        },
-        {
-          value: 'clean',
-          label: 'Remove all files',
-        },
-        {
-          value: 'cancel',
-          label: 'Cancel project creation',
-        },
-      ],
-    });
-
-    if (prompts.isCancel(writeMode)) {
-      prompts.cancel();
-      process.exit(0);
-    }
-
-    context.writeMode = writeMode;
-
-    switch (writeMode) {
+    switch (context.writeMode) {
       case 'overwrite':
         break;
       case 'clean':
