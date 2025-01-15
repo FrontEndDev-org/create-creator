@@ -12,7 +12,9 @@ export async function createCLI() {
       prompts.log.info(pkgDescription);
     },
     onEnd({ prompts, colors, projectPath }) {
-      prompts.outro(`🎉🎉🎉 ${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
+      prompts.log.success('The project has been created successfully!');
+      prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
+      prompts.outro('🎉🎉🎉');
     },
   });
 }
