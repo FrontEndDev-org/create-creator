@@ -72,11 +72,11 @@ export type CreatorContext = {
    */
   projectName: string;
   /**
-   * CLI prompts instance
+   * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
    */
   prompts: Prompts;
   /**
-   * Color utilities instance
+   * Color utilities instance @see https://www.npmjs.com/package/picocolors
    */
   colors: Colors;
   /**
