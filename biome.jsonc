@@ -8,7 +8,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["package-lock.json", "pnpm-lock.{yml,yaml}", "yarn.lock", "templates"]
+    "ignore": ["package.json", "package-lock.json", "pnpm-lock.{yml,yaml}", "yarn.lock", "templates"]
   },
   "formatter": {
     "enabled": true,
