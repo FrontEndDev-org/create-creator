@@ -79,15 +79,13 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): 
     })
     .filter((name) => !ignoreNames.includes(name));
 
-  prompts.log.warn(`The project directory is: ${colors.yellowBright(cwd)}`);
-
   if (files.length === 0) {
     return 'overwrite';
   }
 
   return promptsSafe(
     prompts.select({
-      message: colors.bold(colors.red('The project directory already exists. Pick an action')),
+      message: colors.bold(colors.red('The directory is NOT empty. Pick an action')),
       options: [
         {
           value: 'cancel',

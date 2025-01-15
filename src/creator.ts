@@ -212,6 +212,9 @@ class Creator<T extends Record<string, unknown>> {
 
   async #check() {
     const { context, options } = this;
+
+    prompts.log.warn(`The project directory is: ${colors.yellowBright(context.projectRoot)}`);
+
     context.writeMode = await selectWriteMode(context.projectRoot);
 
     switch (context.writeMode) {
