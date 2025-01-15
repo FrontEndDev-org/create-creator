@@ -151,7 +151,6 @@ it('自定义扩展数据', async () => {
   });
 
   expect(mockExtendData).toHaveBeenCalled();
-  console.log(fs.readdirSync(projectRoot));
   const content = fs.readFileSync(path.join(projectRoot, 'test.txt'), 'utf8');
   expect(content.trim()).toEqual(customValue);
 });
