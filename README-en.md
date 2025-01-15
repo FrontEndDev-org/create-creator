@@ -24,7 +24,7 @@ Create a creator.
 npm create creator my-creator
 ```
 
-- Open `src/cli.ts` to customize project creation logic
+- Open `src/index.ts` to customize project creation logic
 - Open `src/templates` to start writing template files
 
 ## Examples
@@ -32,7 +32,7 @@ npm create creator my-creator
 ### Extending Custom Data
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -58,7 +58,7 @@ Created at: <%= timestamp %>
 ### Conditional Template Rendering
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -80,7 +80,7 @@ export async function createCLI() {
 ### Logging File Writes
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -94,7 +94,7 @@ export async function createCLI() {
 ### Custom CLI Selection
 
 ```ts
-// src/cli.ts
+// src/index.ts
 import { promptsSafe } from 'create-creator';
 
 export async function createCLI() {

@@ -24,7 +24,7 @@ Create a creator.
 npm create creator my-creator
 ```
 
-- 打开 `src/cli.ts` 自定义创建逻辑
+- 打开 `src/index.ts` 自定义创建逻辑
 - 打开 `src/templates` 编写模板文件
 
 ## 示例
@@ -32,7 +32,7 @@ npm create creator my-creator
 ### 扩展自定义数据
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -58,7 +58,7 @@ Created at: <%= timestamp %>
 ### 根据条件渲染不同模板文件
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -80,7 +80,7 @@ export async function createCLI() {
 ### 打印写入文件日志
 
 ```ts
-// src/cli.ts
+// src/index.ts
 export async function createCLI() {
   return createCreator({
     // ... other options
@@ -93,7 +93,7 @@ export async function createCLI() {
 
 ### 自定义命令行选择交互
 ```ts
-// src/cli.ts
+// src/index.ts
 import { promptsSafe } from 'create-creator';
 
 export async function createCLI() {
