@@ -32,10 +32,7 @@
   ],
   "author": "云淡然 <hi@ydr.me> (https://ydr.me)",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/frontenddev-org/create-creator.git"
-  },
+  "repository": "https://github.com/frontenddev-org/create-creator",
   "dependencies": {
     "@clack/prompts": "^0.9.1",
     "ejs": "^3.1.10",
