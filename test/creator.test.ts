@@ -2,10 +2,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import * as clackPrompts from '@clack/prompts';
+import * as colors from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createCreator } from '../src';
 import * as prompts from '../src/prompts';
-import { isDirectory, isFile } from '../src/utils';
+import { execCommand, isDirectory, isFile } from '../src/utils';
 import { runTest } from './helpers';
 
 let templatesRoot: string;
@@ -60,6 +61,9 @@ it('调用 onStart onEnd', async () => {
         expect(context.projectRoot).toEqual(cwd);
         expect(context.projectName).toEqual(path.basename(cwd));
         expect(context.projectPath).toEqual('.');
+        expect(context.prompts).toBe(clackPrompts);
+        expect(context.colors).toBe(colors);
+        expect(context.execCommand).toBe(execCommand);
       },
     });
 
