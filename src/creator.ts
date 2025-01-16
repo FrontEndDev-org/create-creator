@@ -7,7 +7,7 @@ import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
 import { selectWriteMode } from './prompts';
-import { isDirectory } from './utils';
+import { execCommand, isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
@@ -66,6 +66,10 @@ export type CreatorContext = {
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
+  /**
+   * Utility function to execute shell commands
+   */
+  execCommand: typeof execCommand;
 };
 
 const builtinDataKey = 'ctx';
@@ -194,6 +198,7 @@ class Creator<T extends Record<string, unknown>> {
     prompts,
     colors,
     writeMode: 'cancel',
+    execCommand,
   };
   data: CreatorData<T>;
 
