@@ -35,6 +35,3 @@ yarn.lock
 
 # testing
 /coverage
-
-# project
-/test/example-dest
