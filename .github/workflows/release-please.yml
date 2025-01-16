@@ -33,7 +33,7 @@ jobs:
       - uses: ./.github/actions/setup-nvm
       - run: npm ci
       - run: npm run build
-      - uses: FrontEndDev-org/publish-node-package-action@v2
+      - uses: FrontEndDev-org/publish-node-package-action@v2.5
         with:
           target: npm
           token: ${{ secrets.NPM_TOKEN }}
@@ -51,7 +51,7 @@ jobs:
       - uses: ./.github/actions/setup-nvm
       - run: npm ci
       - run: npm run build
-      - uses: FrontEndDev-org/publish-node-package-action@v2
+      - uses: FrontEndDev-org/publish-node-package-action@v2.5
         with:
           target: github
           token: ${{ secrets.GITHUB_TOKEN }}
