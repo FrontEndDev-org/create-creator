@@ -37,6 +37,7 @@ jobs:
         with:
           target: npm
           token: ${{ secrets.NPM_TOKEN }}
+
       - uses: FrontEndDev-org/npm-mirror-sync-action@v1
 
   publish-github:
@@ -54,3 +55,4 @@ jobs:
         with:
           target: github
           token: ${{ secrets.GITHUB_TOKEN }}
+          disableProvenance: true
