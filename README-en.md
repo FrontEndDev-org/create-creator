@@ -22,6 +22,62 @@ Create a creator.
 
 ```bash
 npm create creator my-creator
+
+Need to install the following packages:
+create-creator@1.0.0
+Ok to proceed? (y)
+
+> npx
+> create-creator my-creator
+
+┌   create-creator@1.0.0
+│
+●  Create a creator - npm create creator
+│
+▲  The project directory is: /Users/yundanran/development/localhost/my-creator
+│
+◇  Select node version
+│  v22.x
+│
+◇  Select npm registry
+│  npm official
+│
+◇  Select code linter
+│  biome
+│
+◆  Git repository initialized
+│
+◆  The project has been created successfully!
+│
+◆  cd my-creator to start your coding journey
+│
+└  🎉🎉🎉
+
+my-creator
+├── .editorconfig
+├── .gitignore
+├── .npmrc
+├── .nvmrc
+├── README.md
+├── bin
+│   └── index.cjs
+├── biome.jsonc
+├── commitlint.config.mjs
+├── lefthook.yml
+├── package.json
+├── src
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
+├── templates
+│   └── default
+│       └── README.md
+├── test
+│   └── sample.test.ts
+├── tsconfig.json
+└── vite.config.mts
 ```
 
 - Open `src/index.ts` to customize project creation logic
@@ -123,6 +179,26 @@ export async function createCLI() {
   });
 }
 ```
+
+
+### Dot Files
+Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with _ to handle them correctly in templates.
+```bash
+templates/default/
+├── _gitignore  -> .gitignore
+├── _npmrc      -> .npmrc
+└── README.md
+```
+
+### Underscore Files
+In `templates`, to create dot files you need to use `_*` prefix, so to create files that actually start with underscore (`_*`), you need to use double underscore prefix (`__*`).
+```bash
+templates/default/
+├── __gitignore -> _gitignore
+├── __npmrc     -> _npmrc
+└── README.md
+```
+
 
 ## API
 

@@ -22,6 +22,62 @@ Create a creator.
 
 ```bash
 npm create creator my-creator
+
+Need to install the following packages:
+create-creator@1.0.0
+Ok to proceed? (y)
+
+> npx
+> create-creator my-creator
+
+┌   create-creator@1.0.0
+│
+●  Create a creator - npm create creator
+│
+▲  The project directory is: /Users/yundanran/development/localhost/my-creator
+│
+◇  Select node version
+│  v22.x
+│
+◇  Select npm registry
+│  npm official
+│
+◇  Select code linter
+│  biome
+│
+◆  Git repository initialized
+│
+◆  The project has been created successfully!
+│
+◆  cd my-creator to start your coding journey
+│
+└  🎉🎉🎉
+
+my-creator
+├── .editorconfig
+├── .gitignore
+├── .npmrc
+├── .nvmrc
+├── README.md
+├── bin
+│   └── index.cjs
+├── biome.jsonc
+├── commitlint.config.mjs
+├── lefthook.yml
+├── package.json
+├── src
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
+├── templates
+│   └── default
+│       └── README.md
+├── test
+│   └── sample.test.ts
+├── tsconfig.json
+└── vite.config.mts
 ```
 
 - 打开 `src/index.ts` 自定义创建逻辑
@@ -123,6 +179,23 @@ export async function createCLI() {
 }
 ```
 
+### 点文件
+在 templates/default 目录下创建点（`.*`）文件，例如 .gitignore 和 .npmrc。注意，由于点文件在文件系统中是隐藏文件，需要在文件名前加上 `_` 前缀，以便在模板中正确处理。
+```bash
+templates/default/
+├── _gitignore  -> .gitignore
+├── _npmrc      -> .npmrc
+└── README.md
+```
+
+### 下划线文件
+在 `templates` 中，创建点文件需要 `_*` 开头，那么创建下划线（`_*`）开头的文件，则需要两个下划线开头（`__*`）。
+```bash
+templates/default/
+├── __gitignore -> _gitignore
+├── __npmrc     -> _npmrc
+└── README.md
+```
 
 ## API
 
