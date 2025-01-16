@@ -225,6 +225,14 @@ export type CreatorContext = {
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
+  /**
+   * Utility function to execute shell commands
+   */
+  execCommand: (command: string, options?: ExecOptions) => Promise<[Error | null, {
+      stderr: string;
+      stdout: string;
+      exitCode: number;
+  }]>;
 };
 ```
 
