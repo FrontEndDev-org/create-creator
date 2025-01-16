@@ -12,7 +12,9 @@
   },
   "sideEffects": false,
   "main": "./dist/index.cjs",
-  "bin": "./bin/index.cjs",
+  "bin": {
+    "create-creator": "bin/index.cjs"
+  },
   "module": "./dist/index.mjs",
   "exports": {
     ".": {
@@ -34,7 +36,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/frontenddev-org/create-creator.git"
+    "url": "git+https://github.com/frontenddev-org/create-creator.git"
   },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
