@@ -9,13 +9,13 @@ it('单个文件', async () => {
     cwd,
   });
 
-  mw.is('file1.ts', (a, b) => {
+  mw.match('file1.ts', (a, b) => {
     expect(a).toBe(1);
     expect(b).toBe('2');
     fn2();
     return true;
   });
-  expect(await mw.at('./file1.ts', 1, '2')).toBeTypeOf('boolean');
+  expect(await mw.when('file1.ts', 1, '2')).toBeTypeOf('boolean');
   expect(fn2).toBeCalledTimes(1);
 });
 
@@ -26,15 +26,15 @@ it('多个文件', async () => {
     cwd,
   });
 
-  mw.is(['file1.ts', 'x\\y/file2.js'], (a, b) => {
+  mw.match(['file1.ts', 'x/y/file2.js'], (a, b) => {
     expect(a).toBe(1);
     expect(b).toBe('2');
     fn2();
     return true;
   });
 
-  expect(await mw.at('file1.ts', 1, '2')).toBe(true);
-  expect(await mw.at('x/y/file2.js', 1, '2')).toBe(true);
+  expect(await mw.when('file1.ts', 1, '2')).toBe(true);
+  expect(await mw.when('x/y/file2.js', 1, '2')).toBe(true);
 
   expect(fn2).toBeCalledTimes(2);
 });
@@ -45,17 +45,30 @@ it('不匹配的文件应该返回 undefined', async () => {
     cwd,
   });
 
-  mw.is('file1.ts', () => true);
-  await expect(mw.at('file2.ts')).resolves.toBe(undefined);
-  await expect(mw.at('file1.ts')).resolves.toBe(true);
+  mw.match('file1.ts', () => true);
+  expect(await mw.when('file2.ts')).toBe(undefined);
+  expect(await mw.when('file1.ts')).toBe(true);
 });
 
-it('重复判断的文件应该报错', async () => {
+it('重复判断的文件不会报错', async () => {
   const cwd = '/path/to';
   const mw = new MiddleWare<[number, string], boolean>({
     cwd,
   });
 
-  mw.is('file1.ts', () => true);
-  expect(() => mw.is('file1.ts', () => true)).toThrowError('File file1.ts already matched');
+  mw.match('file1.ts', () => true);
+  mw.match('file1.ts', () => true);
+});
+
+it('模式匹配', async () => {
+  const cwd = '/path/to';
+  const mw = new MiddleWare<[], boolean>({
+    cwd,
+  });
+
+  mw.match('*.ts', () => true);
+
+  expect(await mw.when('file1.ts')).toBe(true);
+  expect(await mw.when('file2.ts')).toBe(true);
+  expect(await mw.when('file3.js')).toBe(undefined);
 });
