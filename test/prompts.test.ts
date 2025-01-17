@@ -1,10 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import * as prompts from '@clack/prompts';
+import * as colors from 'picocolors';
 import { describe, expect, it, vi } from 'vitest';
-import { selectCodeLinter, selectNodeVersion, selectNpmRegistry } from '../src/prompts';
+import { selectCodeLinter, selectNodeVersion, selectNpmRegistry, selectWriteMode } from '../src/prompts';
+import { runTest } from './helpers';
 
 vi.mock('@clack/prompts');
 
-beforeEach(() => {
+afterEach(() => {
   vi.clearAllMocks();
 });
 
@@ -44,5 +48,31 @@ it('should select code linter', async () => {
       expect.objectContaining({ value: 'eslint' }),
       expect.objectContaining({ value: 'biome' }),
     ]),
+  });
+});
+
+it('空目录，直接过，无选择', async () => {
+  await runTest(async ({ cwd }) => {
+    // vi.spyOn(prompts, 'select').mockResolvedValue('overwrite');
+    const result = await selectWriteMode(cwd);
+    expect(result).toBe('overwrite');
+  });
+});
+
+it('有文件，默认取消', async () => {
+  await runTest(async ({ cwd }) => {
+    vi.spyOn(prompts, 'select').mockResolvedValue('cancel');
+    fs.writeFileSync(path.join(cwd, 'test.txt'), 'test');
+    const result = await selectWriteMode(cwd);
+    expect(result).toBe('cancel');
+  });
+});
+
+it('有文件，选择清空', async () => {
+  await runTest(async ({ cwd }) => {
+    fs.writeFileSync(path.join(cwd, 'test.txt'), 'test');
+    vi.spyOn(prompts, 'select').mockResolvedValue('clean');
+    const result = await selectWriteMode(cwd);
+    expect(result).toBe('clean');
   });
 });
