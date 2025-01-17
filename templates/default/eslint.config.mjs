@@ -22,13 +22,14 @@ export default antfu(
     },
     typescript: {
       overrides: {
-        // 不必要显式返回类型
-        // @ref https://typescript-eslint.io/rules/explicit-function-return-type/
         'ts/explicit-function-return-type': ['off'],
+        'ts/no-require-imports': 'off',
       },
     },
     rules: {
+      'unused-imports/no-unused-imports': 'off',
       'unused-imports/no-unused-vars': 'off',
+      'no-console': 'off',
     },
   },
 );
