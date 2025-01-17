@@ -73,7 +73,7 @@ my-creator
 │   └── index.ts
 ├── templates
 │   └── default
-│       └── README.md
+│       └── README.md.ejs
 ├── test
 │   └── sample.test.ts
 ├── tsconfig.json
