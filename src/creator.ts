@@ -1,3 +1,4 @@
+import EventEmitter from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -6,8 +7,11 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
+import type { W } from 'vitest/dist/chunks/reporters.D7Jzd9GS.js';
+import { MiddleWare, type MiddleWareCallback } from './MiddleWare';
+import { TypedEvents } from './TypedEvents';
 import { selectWriteMode } from './prompts';
-import { execCommand, isDirectory } from './utils';
+import { execCommand, isDirectory, normalizePath } from './utils';
 
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
@@ -90,10 +94,7 @@ export type CreatorBuiltinData = {
  */
 export type CreatorData<T> = CreatorBuiltinData & T;
 
-/**
- * Metadata about files being processed
- */
-export type WriteMeta = {
+export type FileTypes = {
   /**
    * Whether file uses EJS templating
    */
@@ -106,6 +107,12 @@ export type WriteMeta = {
    * Whether file uses dot prefix
    */
   isDotFile: boolean;
+};
+
+/**
+ * Metadata about files being processed
+ */
+export type FileMeta = FileTypes & {
   /**
    * Full path to source file
    */
@@ -150,32 +157,22 @@ export type CreatorOptions<T> = {
    */
   templatesRoot: string;
   /**
-   * Callback before template generation
-   */
-  onStart?: (context: CreatorContext) => unknown | Promise<unknown>;
-  /**
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-  /**
-   * Control which files should be written
-   */
-  canWrite?: (meta: WriteMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
+
+  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
+  canRender?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
   /**
    * Custom file writing implementation
    */
-  doWrite?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
+  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
   /**
    * Callback after each file is written
    */
-  onWritten?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after template generation completes
-   */
-  onEnd?: (context: CreatorContext) => unknown | Promise<unknown>;
+  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
 };
 
-const normalizePath = (path: string) => path.replace(/\\/g, '/');
 const UNDERSCORE_FILE_PREFIX = '__';
 const DOT_FILE_PREFIX = '_';
 const EJS_FILE_SUFFIX = '.ejs';
@@ -185,7 +182,10 @@ const EJS_FILE_REGEX = /\.ejs$/i;
  * Main class for handling project creation
  * @template T - Type of custom data to extend with
  */
-class Creator<T extends Record<string, unknown>> {
+export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  start: [context: CreatorContext];
+  end: [context: CreatorContext];
+}> {
   context: CreatorContext = {
     cwd: '',
     templatesRoot: '',
@@ -202,11 +202,15 @@ class Creator<T extends Record<string, unknown>> {
   };
   data: CreatorData<T>;
 
+  fileMetaMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], Partial<FileTypes>>;
+
   /**
    * Create a new Creator instance
    * @param {CreatorOptions<T>} options - Configuration options
    */
   constructor(private readonly options: CreatorOptions<T>) {
+    super();
+
     const cwd = normalizePath(options.cwd || process.cwd());
     const projectRoot = normalizePath(path.resolve(cwd, options.projectPath || '.'));
     const { context } = this;
@@ -221,6 +225,18 @@ class Creator<T extends Record<string, unknown>> {
       : `create-${context.projectName}`;
 
     this.data = { ctx: context } as CreatorData<T>;
+
+    this.fileMetaMW = new MiddleWare({
+      cwd: context.templatesRoot,
+    });
+  }
+
+  fileIntercept(
+    paths: string | string[],
+    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], Partial<FileTypes>>,
+  ) {
+    this.fileMetaMW.match(paths, interceptor);
+    return this;
   }
 
   async #check() {
@@ -266,44 +282,31 @@ class Creator<T extends Record<string, unknown>> {
 
   async #generate() {
     const { context, options } = this;
-    const files = await glob('**/*', {
+    const paths = await glob('**/*', {
       nodir: true,
       cwd: context.templateRoot,
       dot: false,
     });
 
-    if (files.length === 0) {
+    if (paths.length === 0) {
       prompts.cancel(`No files found in template(${context.templateName})`);
       process.exit(1);
     }
 
-    for (const sourcePath of files) {
+    for (const sourcePath of paths) {
       const fileName = path.basename(sourcePath);
       const fileFolder = path.dirname(sourcePath);
       const sourceFile = normalizePath(path.join(context.templateRoot, sourcePath));
+
       const isEjsFile = EJS_FILE_REGEX.test(sourcePath);
       const isUnderscoreFile = sourcePath.startsWith(UNDERSCORE_FILE_PREFIX);
       const isDotFile = !isUnderscoreFile && sourcePath.startsWith(DOT_FILE_PREFIX);
 
-      let start = 0;
-      let end = undefined;
-      let prefix = '';
-
-      if (isEjsFile) {
-        end = -EJS_FILE_SUFFIX.length;
-      }
-
-      if (isUnderscoreFile) {
-        start = UNDERSCORE_FILE_PREFIX.length;
-        prefix = '_';
-      } else if (isDotFile) {
-        start = DOT_FILE_PREFIX.length;
-        prefix = '.';
-      }
-
+      const { prefix, end, start } = calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile });
       const targetPath = normalizePath(path.join(fileFolder, prefix + fileName.slice(start, end)));
       const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
-      const writeMeta: WriteMeta = {
+
+      const fileMeta: FileMeta = {
         isDotFile,
         isEjsFile,
         isUnderscoreFile,
@@ -314,25 +317,44 @@ class Creator<T extends Record<string, unknown>> {
         targetFile,
         targetRoot: context.projectRoot,
       };
+      const fileTypes = await this.fileMetaMW.when(path.join(context.templateName, sourcePath), fileMeta, this.data);
 
-      if (options.canWrite?.call(null, writeMeta, this.data) === false) {
+      // 修改了 fileTypes
+      if (fileTypes) {
+        const { isDotFile, isEjsFile, isUnderscoreFile } = fileTypes;
+        const { prefix, end, start } = calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile });
+        const targetPath = normalizePath(path.join(fileFolder, prefix + fileName.slice(start, end)));
+        const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
+        fileMeta.targetPath = targetPath;
+        fileMeta.targetFile = targetFile;
+        fileMeta.isDotFile = isDotFile || false;
+        fileMeta.isEjsFile = isEjsFile || false;
+        fileMeta.isUnderscoreFile = isUnderscoreFile || false;
+      }
+
+      if ((await options.canWrite?.call(null, fileMeta, this.data)) === false) {
         continue;
       }
 
-      if (options.doWrite) {
-        await options.doWrite(writeMeta, this.data);
-      } else if (isEjsFile) {
-        const template = await fse.readFile(sourceFile, 'utf8');
-        fse.outputFileSync(targetFile, ejs.render(template, this.data));
-      } else {
-        fse.copySync(sourceFile, targetFile);
-      }
-
-      options.onWritten?.call(null, writeMeta, this.data);
+      await this.#write(fileMeta);
+      options.onWritten?.call(null, fileMeta, this.data);
     }
   }
 
-  async start() {
+  async #write(fileMeta: FileMeta) {
+    const { context, options } = this;
+
+    if (options.doWrite) {
+      await options.doWrite(fileMeta, this.data);
+    } else if (fileMeta.isEjsFile) {
+      const template = await fse.readFile(fileMeta.sourceFile, 'utf8');
+      fse.outputFileSync(fileMeta.targetFile, ejs.render(template, this.data));
+    } else {
+      fse.copySync(fileMeta.sourceFile, fileMeta.targetFile);
+    }
+  }
+
+  async create() {
     const { context, options } = this;
 
     if (isDirectory(context.templatesRoot) === false) {
@@ -349,7 +371,8 @@ class Creator<T extends Record<string, unknown>> {
       process.exit(1);
     }
 
-    await options.onStart?.call(null, context);
+    await this.emit('start', context);
+
     context.templateName =
       templateNames.length === 1
         ? templateNames[0]
@@ -365,17 +388,26 @@ class Creator<T extends Record<string, unknown>> {
     await this.#check();
     await this.#extend();
     await this.#generate();
-
-    await options.onEnd?.call(null, context);
+    await this.emit('end', context);
   }
 }
 
-/**
- * Build and start a new creator instance
- * @template T - Type of custom data to extend with
- * @param {CreatorOptions<T>} options - Configuration options
- * @returns {Promise<void>}
- */
-export async function createCreator<T extends Record<string, unknown>>(options: CreatorOptions<T>) {
-  await new Creator<T>(options).start();
+export function calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile }: Partial<FileTypes>) {
+  let start = 0;
+  let end = undefined;
+  let prefix = '';
+
+  if (isEjsFile) {
+    end = -EJS_FILE_SUFFIX.length;
+  }
+
+  if (isUnderscoreFile) {
+    start = UNDERSCORE_FILE_PREFIX.length;
+    prefix = '_';
+  } else if (isDotFile) {
+    start = DOT_FILE_PREFIX.length;
+    prefix = '.';
+  }
+
+  return { start, end, prefix };
 }
