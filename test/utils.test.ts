@@ -1,8 +1,8 @@
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { execCommand, isDirectory, isFile } from '../src/utils';
+import { execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
+import { testRoot } from './helpers';
 
 let tempDir: string;
 let testFile: string;
@@ -10,7 +10,8 @@ let testDir: string;
 
 beforeAll(async () => {
   // 创建临时目录
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-utils-'));
+  fs.mkdirSync(testRoot, { recursive: true });
+  tempDir = fs.mkdtempSync(path.join(testRoot, 'test-utils-'));
 
   // 创建测试文件
   testFile = path.join(tempDir, 'test-file.txt');
@@ -51,6 +52,29 @@ describe('isFile', () => {
 
   it('should return false for non-existent path', () => {
     expect(isFile(path.join(tempDir, 'non-existent'))).toBe(false);
+  });
+});
+
+describe('normalizePath', () => {
+  it('should convert Windows paths to forward slashes', () => {
+    expect(normalizePath('path\\to\\file')).toBe('path/to/file');
+    expect(normalizePath('C:\\path\\to\\file')).toBe('C:/path/to/file');
+  });
+
+  it('should handle mixed paths', () => {
+    expect(normalizePath('path\\to/file')).toBe('path/to/file');
+    expect(normalizePath('path/to\\file')).toBe('path/to/file');
+  });
+
+  it('should leave already normalized paths unchanged', () => {
+    expect(normalizePath('path/to/file')).toBe('path/to/file');
+    expect(normalizePath('/path/to/file')).toBe('/path/to/file');
+  });
+
+  it('should handle edge cases', () => {
+    expect(normalizePath('')).toBe('');
+    expect(normalizePath('/')).toBe('/');
+    expect(normalizePath('\\')).toBe('/');
   });
 });
 
