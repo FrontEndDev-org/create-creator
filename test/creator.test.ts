@@ -21,14 +21,16 @@ beforeAll(async () => {
   templateRoot = path.join(templatesRoot, 'default');
   fs.mkdirSync(templateRoot, { recursive: true });
   // 创建测试模板文件
-  fs.writeFileSync(path.join(templateRoot, 'test.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fs.writeFileSync(path.join(templateRoot, 'file1.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fs.writeFileSync(path.join(templateRoot, '__file2.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fs.writeFileSync(path.join(templateRoot, '_file3.txt.ejs'), 'Hello <%= ctx.projectName %>');
   fs.mkdirSync(path.join(templateRoot, 'path/to'), { recursive: true });
-  fs.writeFileSync(path.join(templateRoot, 'path/to/test.txt'), 'Hello <%= ctx.projectName %>');
+  fs.writeFileSync(path.join(templateRoot, 'path/to/file4.txt'), 'Hello <%= ctx.projectName %>');
 });
 
 afterAll(() => {
   vi.clearAllMocks();
-  // fs.rmSync(templatesRoot, { recursive: true, force: true });
+  fs.rmSync(templatesRoot, { recursive: true, force: true });
 });
 
 beforeEach(() => {
@@ -97,7 +99,7 @@ it('覆盖模式应该覆盖现有文件', async () => {
     await creator.create();
 
     // 验证文件被覆盖
-    const content = fs.readFileSync(path.join(cwd, 'test.txt'), 'utf8');
+    const content = fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8');
     expect(content).toMatch(/Hello/);
   });
 });
@@ -141,69 +143,34 @@ it('EJS 文件应该正确渲染', async () => {
     });
     await creator.create();
 
-    const content = fs.readFileSync(path.join(cwd, projectName, 'test.txt'), 'utf8');
+    const content = fs.readFileSync(path.join(cwd, projectName, 'file1.txt'), 'utf8');
     expect(content.trim()).toEqual(`Hello ${projectName}`);
   });
 });
 
 it('应该正确处理不同的EJS文件扩展名', async () => {
-  await runTest(
-    async ({ cwd }) => {
-      fs.writeFileSync(path.join(templateRoot, 'test.txt.ejs'), '<%= ctx.projectName %>');
-      fs.writeFileSync(path.join(templateRoot, 'test.html.ejs'), '<%= ctx.projectName %>');
-
-      const creator = new Creator({
-        cwd,
-        templatesRoot,
-      });
-      await creator.create();
-
-      expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(true);
-      expect(fs.existsSync(path.join(cwd, 'test.html'))).toBe(true);
-    },
-    () => {
-      fs.rmSync(path.join(templateRoot, 'test.txt.ejs'));
-      fs.rmSync(path.join(templateRoot, 'test.html.ejs'));
-    },
-  );
-});
-
-it('应该根据linter选择跳过文件', async () => {
   await runTest(async ({ cwd }) => {
-    fs.writeFileSync(path.join(templateRoot, 'biome.jsonc'), '{}');
-    fs.writeFileSync(path.join(templateRoot, 'eslint.config.mjs'), '{}');
-    fs.writeFileSync(path.join(templateRoot, 'prettier.config.mjs'), '{}');
-
     const creator = new Creator({
       cwd,
       templatesRoot,
-      canWrite(meta, data) {
-        const disableWrites = {
-          eslint: ['biome'],
-          biome: ['eslint', 'prettier'],
-        };
-        const disables = disableWrites.biome;
-        if (disables.some((d) => meta.targetPath.includes(d))) {
-          return false;
-        }
-        return true;
-      },
     });
     await creator.create();
 
-    expect(fs.existsSync(path.join(cwd, 'biome.jsonc'))).toBe(true);
-    expect(fs.existsSync(path.join(cwd, 'eslint.config.mjs'))).toBe(false);
-    expect(fs.existsSync(path.join(cwd, 'prettier.config.mjs'))).toBe(false);
+    expect(fs.existsSync(path.join(cwd, 'file1.txt'))).toBe(true);
+    expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch(path.basename(cwd));
   });
 });
 
 it('应该支持自定义扩展数据', async () => {
-  const fileName = `${Math.random().toString(36).slice(2)}.xxx`;
+  const templatesRoot = fs.mkdtempSync(path.join(testRoot, 'templates-'));
   await runTest(
     async ({ cwd }) => {
+      const templateRoot = path.join(templatesRoot, 'default');
+      const fileName = `${Math.random().toString(36).slice(2)}.xxx`;
       const customValue = Math.random().toString();
       const mockExtendData = vi.fn().mockResolvedValue({ customValue });
 
+      fs.mkdirSync(templateRoot, { recursive: true });
       fs.writeFileSync(path.join(templateRoot, `${fileName}.ejs`), '<%= customValue %>');
 
       const creator = new Creator({
@@ -218,97 +185,44 @@ it('应该支持自定义扩展数据', async () => {
       expect(content.trim()).toEqual(customValue);
     },
     () => {
-      fs.rmSync(path.join(templateRoot, `${fileName}.ejs`));
+      fs.rmSync(templatesRoot, { recursive: true, force: true });
     },
   );
 });
 
-it('应该支持写入前判断', async () => {
-  await runTest(async ({ cwd }) => {
-    const mockCanWrite = vi.fn().mockReturnValue(false);
-
-    const creator = new Creator({
-      cwd,
-      templatesRoot,
-      canWrite: mockCanWrite,
-    });
-    await creator.create();
-
-    expect(mockCanWrite).toHaveBeenCalled();
-    expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
-  });
-});
-
-it('应该支持修改写入文件名', async () => {
-  await runTest(async ({ cwd }) => {
-    const creator = new Creator({
-      cwd,
-      templatesRoot,
-      canWrite({ sourcePath }) {
-        if (sourcePath === 'test.txt') {
-          return false;
-        }
-
-        return true;
-      },
-    });
-
-    expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
-    expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
-  });
-});
-
-it('应该支持自定义写入方法', async () => {
-  await runTest(async ({ cwd }) => {
-    const mockDoWrite = vi.fn();
-
-    const creator = new Creator({
-      cwd,
-      templatesRoot,
-      doWrite: mockDoWrite,
-    });
-    await creator.create();
-
-    expect(mockDoWrite).toHaveBeenCalled();
-    expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
-  });
-});
-
 it('应该正确处理下划线前缀文件', async () => {
-  const fileName = `${Math.random().toString(36).slice(2)}.xxx`;
   await runTest(async ({ cwd }) => {
-    fs.writeFileSync(path.join(templateRoot, `__${fileName}`), 'test content');
-
     const creator = new Creator({
       cwd,
       templatesRoot,
     });
     await creator.create();
 
-    expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(true);
-    expect(fs.existsSync(path.join(cwd, `__${fileName}`))).toBe(false);
+    expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(false);
+    expect(isFile(path.join(cwd, '__file2.txt'))).toBe(false);
+    expect(isFile(path.join(cwd, '_file2.txt'))).toBe(true);
+    expect(isFile(path.join(cwd, '.file2.txt'))).toBe(false);
+
+    expect(isFile(path.join(cwd, '_file3.txt.ejs'))).toBe(false);
+    expect(isFile(path.join(cwd, '_file3.txt'))).toBe(false);
+    expect(isFile(path.join(cwd, '.file3.txt'))).toBe(true);
   });
 });
 
 it('应该正确处理点前缀文件', async () => {
   const fileName = `${Math.random().toString(36).slice(2)}.xx`;
-  await runTest(
-    async ({ cwd }) => {
-      fs.writeFileSync(path.join(templateRoot, `_${fileName}`), 'test content');
+  await runTest(async ({ cwd }) => {
+    fs.writeFileSync(path.join(templateRoot, `_${fileName}`), 'test content');
 
-      const creator = new Creator({
-        cwd,
-        templatesRoot,
-      });
-      await creator.create();
+    const creator = new Creator({
+      cwd,
+      templatesRoot,
+    });
+    await creator.create();
 
-      expect(fs.existsSync(path.join(cwd, `.${fileName}`))).toBe(true);
-      expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(false);
-    },
-    ({ cwd }) => {
-      fs.rmSync(path.join(templateRoot, `_${fileName}`));
-    },
-  );
+    expect(fs.existsSync(path.join(cwd, `.${fileName}`))).toBe(true);
+    expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(false);
+  });
 });
 
 it('应该正确规范化路径', async () => {
@@ -327,5 +241,83 @@ it('应该正确规范化路径', async () => {
     expect(context.cwd).not.toMatch(/\\/);
     expect(context.templatesRoot).not.toMatch(/\\/);
     expect(context.projectRoot).not.toMatch(/\\/);
+  });
+});
+
+it('写入文件前拦截 disableRenderEjs', async () => {
+  await runTest(async ({ cwd }) => {
+    const creator = new Creator({
+      cwd,
+      templatesRoot,
+    });
+
+    creator.writeIntercept('**/*.ejs', (meta) => {
+      return {
+        disableRenderEjs: true,
+      };
+    });
+
+    await creator.create();
+
+    expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch('<%=');
+    expect(fs.readFileSync(path.join(cwd, 'path/to/file4.txt'), 'utf8')).toMatch('<%=');
+  });
+});
+
+it('写入文件前拦截 disableWrite', async () => {
+  await runTest(async ({ cwd }) => {
+    const creator = new Creator({
+      cwd,
+      templatesRoot,
+    });
+
+    creator.writeIntercept('**/*.txt', (meta) => {
+      return {
+        disableWrite: true,
+      };
+    });
+
+    await creator.create();
+
+    expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(false);
+    expect(isFile(path.join(cwd, 'file1.txt'))).toBe(true);
+    expect(isFile(path.join(cwd, 'path/to/file4.txt'))).toBe(false);
+  });
+});
+
+it('写入文件前拦截 targetFileName', async () => {
+  await runTest(async ({ cwd }) => {
+    const creator = new Creator({
+      cwd,
+      templatesRoot,
+    });
+
+    creator.writeIntercept('**/*.ejs', (meta) => {
+      return {
+        targetFileName: meta.sourceFileName,
+      };
+    });
+
+    creator.writeIntercept('**/*.txt', (meta) => {
+      return {
+        targetFileName: `${meta.targetFileName}.ok`,
+      };
+    });
+
+    await creator.create();
+
+    expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(true);
+    expect(isFile(path.join(cwd, 'file1.txt'))).toBe(false);
+
+    expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(true);
+    expect(isFile(path.join(cwd, '_file3.txt.ejs'))).toBe(true);
+
+    expect(isFile(path.join(cwd, 'path/to/file4.txt'))).toBe(false);
+    expect(isFile(path.join(cwd, 'path/to/file4.txt.ok'))).toBe(true);
+
+    expect(fs.readFileSync(path.join(cwd, 'file1.txt.ejs'), 'utf8')).not.toMatch('<%=');
+    expect(fs.readFileSync(path.join(cwd, '__file2.txt.ejs'), 'utf8')).not.toMatch('<%=');
+    expect(fs.readFileSync(path.join(cwd, '_file3.txt.ejs'), 'utf8')).not.toMatch('<%=');
+    expect(fs.readFileSync(path.join(cwd, 'path/to/file4.txt.ok'), 'utf8')).toMatch('<%=');
   });
 });
