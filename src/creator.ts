@@ -94,7 +94,28 @@ export type CreatorBuiltinData = {
  */
 export type CreatorData<T> = CreatorBuiltinData & T;
 
-export type FileTypes = {
+export type OverrideFileMeta = {
+  /**
+   * 是否禁止渲染 ejs，如果是 ejs 文件的话
+   */
+  disableRenderEjs?: boolean;
+
+  /**
+   * 指定目标文件名
+   */
+  targetFileName?: string;
+
+  /**
+   * 是否禁止生成文件
+   * 为 true 时将忽略其他配置
+   */
+  disableWrite?: boolean;
+};
+
+/**
+ * Metadata about files being processed
+ */
+export type FileMeta = {
   /**
    * Whether file uses EJS templating
    */
@@ -107,36 +128,40 @@ export type FileTypes = {
    * Whether file uses dot prefix
    */
   isDotFile: boolean;
-};
 
-/**
- * Metadata about files being processed
- */
-export type FileMeta = FileTypes & {
-  /**
-   * Full path to source file
-   */
-  sourceFile: string;
-  /**
-   * Relative path to source file
-   */
-  sourcePath: string;
   /**
    * Root directory of source files
    */
   sourceRoot: string;
   /**
-   * Full path to target file
+   * Name of source file
    */
-  targetFile: string;
+  sourceFileName: string;
+  /**
+   * Relative path to source file
+   */
+  sourcePath: string;
+  /**
+   * Full path to source file
+   */
+  sourceFile: string;
+
+  /**
+   * Root directory of target files
+   */
+  targetRoot: string;
+  /**
+   * Name of target file
+   */
+  targetFileName: string;
   /**
    * Relative path to target file
    */
   targetPath: string;
   /**
-   * Root directory of target files
+   * Full path to target file
    */
-  targetRoot: string;
+  targetFile: string;
 };
 
 /**
@@ -160,17 +185,6 @@ export type CreatorOptions<T> = {
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-
-  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
-  canRender?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
-  /**
-   * Custom file writing implementation
-   */
-  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after each file is written
-   */
-  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
 };
 
 const UNDERSCORE_FILE_PREFIX = '__';
@@ -184,6 +198,7 @@ const EJS_FILE_REGEX = /\.ejs$/i;
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   start: [context: CreatorContext];
+  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
   end: [context: CreatorContext];
 }> {
   context: CreatorContext = {
@@ -202,7 +217,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   };
   data: CreatorData<T>;
 
-  fileMetaMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], Partial<FileTypes>>;
+  #writeMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>;
 
   /**
    * Create a new Creator instance
@@ -226,16 +241,16 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     this.data = { ctx: context } as CreatorData<T>;
 
-    this.fileMetaMW = new MiddleWare({
+    this.#writeMW = new MiddleWare({
       cwd: context.templatesRoot,
     });
   }
 
-  fileIntercept(
+  writeIntercept(
     paths: string | string[],
-    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], Partial<FileTypes>>,
+    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>,
   ) {
-    this.fileMetaMW.match(paths, interceptor);
+    this.#writeMW.match(paths, interceptor);
     return this;
   }
 
@@ -294,64 +309,72 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     }
 
     for (const sourcePath of paths) {
-      const fileName = path.basename(sourcePath);
-      const fileFolder = path.dirname(sourcePath);
+      const sourceFileName = path.basename(sourcePath);
+      const sourceFolder = path.dirname(sourcePath);
       const sourceFile = normalizePath(path.join(context.templateRoot, sourcePath));
 
       const isEjsFile = EJS_FILE_REGEX.test(sourcePath);
       const isUnderscoreFile = sourcePath.startsWith(UNDERSCORE_FILE_PREFIX);
       const isDotFile = !isUnderscoreFile && sourcePath.startsWith(DOT_FILE_PREFIX);
 
-      const { prefix, end, start } = calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile });
-      const targetPath = normalizePath(path.join(fileFolder, prefix + fileName.slice(start, end)));
+      let start = 0;
+      let end = undefined;
+      let prefix = '';
+
+      if (isEjsFile) {
+        end = -EJS_FILE_SUFFIX.length;
+      }
+
+      if (isUnderscoreFile) {
+        start = UNDERSCORE_FILE_PREFIX.length;
+        prefix = '_';
+      } else if (isDotFile) {
+        start = DOT_FILE_PREFIX.length;
+        prefix = '.';
+      }
+
+      const targetPath = normalizePath(path.join(sourceFolder, prefix + sourceFileName.slice(start, end)));
       const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
 
       const fileMeta: FileMeta = {
         isDotFile,
-        isEjsFile,
+        isEjsFile: isEjsFile,
         isUnderscoreFile,
         sourcePath,
         sourceFile,
         sourceRoot: context.templateRoot,
+        sourceFileName,
         targetPath,
         targetFile,
         targetRoot: context.projectRoot,
+        targetFileName: path.basename(targetPath),
       };
-      const fileTypes = await this.fileMetaMW.when(path.join(context.templateName, sourcePath), fileMeta, this.data);
-
-      // 修改了 fileTypes
-      if (fileTypes) {
-        const { isDotFile, isEjsFile, isUnderscoreFile } = fileTypes;
-        const { prefix, end, start } = calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile });
-        const targetPath = normalizePath(path.join(fileFolder, prefix + fileName.slice(start, end)));
-        const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
-        fileMeta.targetPath = targetPath;
-        fileMeta.targetFile = targetFile;
-        fileMeta.isDotFile = isDotFile || false;
-        fileMeta.isEjsFile = isEjsFile || false;
-        fileMeta.isUnderscoreFile = isUnderscoreFile || false;
-      }
-
-      if ((await options.canWrite?.call(null, fileMeta, this.data)) === false) {
-        continue;
-      }
 
       await this.#write(fileMeta);
-      options.onWritten?.call(null, fileMeta, this.data);
     }
   }
 
   async #write(fileMeta: FileMeta) {
     const { context, options } = this;
+    const overrideFileMeta = await this.#writeMW.when(fileMeta.sourcePath, fileMeta, this.data);
+    const { disableRenderEjs, disableWrite, targetFileName } = overrideFileMeta || {};
 
-    if (options.doWrite) {
-      await options.doWrite(fileMeta, this.data);
-    } else if (fileMeta.isEjsFile) {
-      const template = await fse.readFile(fileMeta.sourceFile, 'utf8');
-      fse.outputFileSync(fileMeta.targetFile, ejs.render(template, this.data));
-    } else {
-      fse.copySync(fileMeta.sourceFile, fileMeta.targetFile);
+    if (disableWrite) return;
+
+    let targetFile = fileMeta.targetFile;
+
+    if (targetFileName) {
+      targetFile = path.join(context.projectRoot, fileMeta.targetPath, '..', targetFileName || fileMeta.sourceFileName);
     }
+
+    if (fileMeta.isEjsFile && !disableRenderEjs) {
+      const template = await fse.readFile(fileMeta.sourceFile, 'utf8');
+      fse.outputFileSync(targetFile, ejs.render(template, this.data));
+    } else {
+      fse.copySync(fileMeta.sourceFile, targetFile);
+    }
+
+    await this.emit('write', fileMeta, this.data, overrideFileMeta);
   }
 
   async create() {
@@ -390,24 +413,4 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     await this.#generate();
     await this.emit('end', context);
   }
-}
-
-export function calculateFileMate({ isDotFile, isEjsFile, isUnderscoreFile }: Partial<FileTypes>) {
-  let start = 0;
-  let end = undefined;
-  let prefix = '';
-
-  if (isEjsFile) {
-    end = -EJS_FILE_SUFFIX.length;
-  }
-
-  if (isUnderscoreFile) {
-    start = UNDERSCORE_FILE_PREFIX.length;
-    prefix = '_';
-  } else if (isDotFile) {
-    start = DOT_FILE_PREFIX.length;
-    prefix = '.';
-  }
-
-  return { start, end, prefix };
 }
