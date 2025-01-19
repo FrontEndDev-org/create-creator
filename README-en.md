@@ -30,7 +30,7 @@ Ok to proceed? (y)
 > npx
 > create-creator my-creator
 
-┌   create-creator@1.0.0
+┌   create-creator@2.0.0
 │
 ●  Create a creator - npm create creator
 │
