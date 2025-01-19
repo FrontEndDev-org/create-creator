@@ -96,18 +96,18 @@ export type CreatorData<T> = CreatorBuiltinData & T;
 
 export type OverrideFileMeta = {
   /**
-   * 是否禁止渲染 ejs，如果是 ejs 文件的话
+   * Whether to disable EJS rendering for EJS files
    */
   disableRenderEjs?: boolean;
 
   /**
-   * 指定目标文件名
+   * Specify target file name
    */
   targetFileName?: string;
 
   /**
-   * 是否禁止生成文件
-   * 为 true 时将忽略其他配置
+   * Whether to disable file writing
+   * When true, other configurations will be ignored
    */
   disableWrite?: boolean;
 };
@@ -198,7 +198,7 @@ const EJS_FILE_REGEX = /\.ejs$/i;
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   start: [context: CreatorContext];
-  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  written: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
   end: [context: CreatorContext];
 }> {
   context: CreatorContext = {
@@ -303,8 +303,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       dot: false,
     });
 
+    // Verify selected template contains files
     if (paths.length === 0) {
-      prompts.cancel(`No files found in template(${context.templateName})`);
+      prompts.cancel(`Template "${context.templateName}" is empty - add project files to ${context.templateRoot}`);
       process.exit(1);
     }
 
@@ -374,23 +375,35 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       fse.copySync(fileMeta.sourceFile, targetFile);
     }
 
-    await this.emit('write', fileMeta, this.data, overrideFileMeta);
+    await this.emit('written', fileMeta, this.data, overrideFileMeta);
   }
 
   async create() {
     const { context, options } = this;
 
+    // Verify templates root directory exists and is accessible
     if (isDirectory(context.templatesRoot) === false) {
-      prompts.cancel(`Templates root directory ${context.templatesRoot} does not exist`);
+      prompts.cancel(
+        `Invalid templates directory "${context.templatesRoot}" - create a templates folder containing your project templates`,
+      );
       process.exit(1);
     }
 
-    const templateNames = fs
-      .readdirSync(context.templatesRoot)
-      .filter((name) => !name.startsWith('.') && !name.startsWith('_'));
+    // Scan templates root directory for valid template folders
+    const templateNames = fs.readdirSync(context.templatesRoot).filter((name) => {
+      const fullPath = path.join(context.templatesRoot, name);
+      return (
+        !name.startsWith('.') && // Skip hidden files/directories
+        !name.startsWith('_') && // Skip underscore prefixed files/directories
+        fs.statSync(fullPath).isDirectory() // Only include actual directories
+      );
+    });
 
+    // Verify templates directory contains at least one valid template
     if (templateNames.length === 0) {
-      prompts.cancel('No templates found');
+      prompts.cancel(
+        `No templates found in "${context.templatesRoot}" - add template folders containing your project files`,
+      );
       process.exit(1);
     }
 
