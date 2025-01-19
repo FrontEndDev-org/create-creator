@@ -35,11 +35,11 @@ it('should re-export creator types', () => {
   // Import types directly from index to verify they match creator types
   type IndexCreatorOptions = import('../src/index').CreatorOptions<unknown>;
   type IndexCreatorContext = import('../src/index').CreatorContext;
-  type IndexWriteMeta = import('../src/index').WriteMeta;
+  type IndexWriteMeta = import('../src/index').FileMeta;
   type IndexCreatorData = import('../src/index').CreatorData<unknown>;
 
   expectTypeOf<IndexCreatorOptions>().toEqualTypeOf<creatorModule.CreatorOptions<unknown>>();
   expectTypeOf<IndexCreatorContext>().toEqualTypeOf<creatorModule.CreatorContext>();
-  expectTypeOf<IndexWriteMeta>().toEqualTypeOf<creatorModule.WriteMeta>();
+  expectTypeOf<IndexWriteMeta>().toEqualTypeOf<creatorModule.FileMeta>();
   expectTypeOf<IndexCreatorData>().toEqualTypeOf<creatorModule.CreatorData<unknown>>();
 });
