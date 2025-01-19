@@ -26,7 +26,7 @@ export class MiddleWare<I extends unknown[], O> {
     const hooks = this.#hooks.filter((hook) => hook.patterns.find((pattern) => minimatch(pth, pattern)));
 
     if (hooks.length === 0) return undefined;
-    if (hooks.length === 1) return hooks[0].callback(...inputs);
+    if (hooks.length === 1) return hooks[0].callback.apply(null, inputs);
 
     throw new Error(`Multiple hooks found for file ${pth}`);
   }
