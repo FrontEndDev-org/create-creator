@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 (2025-01-19)
+
+
+### Features
+
+* **creator:** 重构文件写入流程并添加元数据支持 ([0a100ef](https://github.com/FrontEndDev-org/create-creator/commit/0a100efc2b7366573a1ce9f1af5a84b06e4c2c1d))
+
+
+### Performance Improvements
+
+* **MiddleWare:** 优化 MiddleWare 类中的钩子调用方式 ([8d166dc](https://github.com/FrontEndDev-org/create-creator/commit/8d166dce4f0bc916dc6b1ff3cb8ec3b01e804cbe))
+
 ## 1.0.0 (2025-01-16)
 
 
