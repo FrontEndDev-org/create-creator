@@ -1,10 +1,8 @@
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
-import * as clackPrompts from '@clack/prompts';
-import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest';
-import { createCLI, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from '../src';
+import { afterAll, beforeAll, expect, it, vi } from 'vitest';
+import { createCLI } from '../src';
 import * as prompts from '../src/prompts.ts';
 import { isDirectory, isFile } from '../src/utils.ts';
 import { runTest } from './helpers.ts';
