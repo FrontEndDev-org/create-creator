@@ -5,11 +5,6 @@ import { Creator } from './creator';
 import { selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 import { execCommand, isDirectory } from './utils';
 
-const disableWrites = {
-  eslint: ['biome'],
-  biome: ['eslint', 'prettier'],
-};
-
 export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
@@ -24,14 +19,6 @@ export async function createCLI() {
         npmRegistry,
         codeLinter,
       };
-    },
-    canWrite(meta, data) {
-      const disables = disableWrites[data.codeLinter as keyof typeof disableWrites];
-      const targetName = path.basename(meta.targetPath);
-
-      if (disables.some((d) => targetName.includes(d))) return false;
-
-      return true;
     },
   });
 
@@ -58,13 +45,18 @@ export async function createCLI() {
     prompts.outro('🎉🎉🎉');
   });
 
-  creator.fileIntercept(['default/templates/**/*.ejs'], (meta, data) => ({
-    isEjsFile: false,
+  creator.writeIntercept(['default/templates/**/*.ejs'], (meta, data) => ({
+    disableRenderEjs: true,
+    targetFileName: meta.sourceFileName,
   }));
-  // creator.writeMetaIntercept(
-  //   ['eslint.config.mjs', 'prettier.config.mjs'],
-  //   (meta, data) => data.codeLinter === 'eslint',
-  // );
+
+  creator.writeIntercept(['eslint*', 'prettier*', '_prettier*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'eslint',
+  }));
+
+  creator.writeIntercept(['biome.*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'biome',
+  }));
 
   await creator.create();
 }
