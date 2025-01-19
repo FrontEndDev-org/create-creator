@@ -8,7 +8,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![npm version](https://badge.fury.io/js/create-creator.svg)](https://npmjs.com/package/create-creator)
 
-Create a creator.
+创建一个脚手架。
 
 ## 功能特性
 
@@ -90,7 +90,7 @@ my-creator
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
       // Add custom data
@@ -100,6 +100,7 @@ export async function createCLI() {
       };
     }
   });
+  await creator.create();
 }
 ```
 
@@ -116,20 +117,19 @@ Created at: <%= timestamp %>
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
-    canWrite(meta, data) {
-      if (data.codeLinter === 'eslint' && meta.targetPath.includes('biome')) {
-        return false;
-      }
-
-       if (data.codeLinter === 'biome' && meta.targetPath.includes('eslint')) {
-        return false;
-      }
-
-      return true;
-    }
   });
+
+  creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'eslint',
+  }));
+
+  creator.writeIntercept(['biome*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'biome',
+  }));
+
+  await creator.create();
 }
 ```
 
@@ -138,12 +138,18 @@ export async function createCLI() {
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     onWritten(meta, data) {
       console.log(`Created file: ${meta.targetPath}`);
     }
   });
+
+  creator.on('written', (meta, data) => {
+    console.log(`写入文件: ${meta.targetPath}`);
+  });
+
+  await creator.create();
 }
 ```
 
@@ -153,7 +159,7 @@ export async function createCLI() {
 import { promptsSafe } from 'create-creator';
 
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
       const tabSize = await promptsSafe(prompts.select({
@@ -232,20 +238,129 @@ export type CreatorOptions<T> = {
   /**
    * Control which files should be written
    */
-  canWrite?: (meta: WriteMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
+  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
   /**
    * Custom file writing implementation
    */
-  doWrite?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
+  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
   /**
    * Callback after each file is written
    */
-  onWritten?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
+  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
   /**
    * Callback after template generation completes
    */
   onEnd?: (context: CreatorContext) => unknown | Promise<unknown>;
 };
+```
+
+### `FileMeta`
+```ts
+/**
+ * Metadata about files being processed
+ */
+export type FileMeta = {
+  /**
+   * Whether file uses EJS templating
+   */
+  isEjsFile: boolean;
+  /**
+   * Whether file uses underscore prefix
+   */
+  isUnderscoreFile: boolean;
+  /**
+   * Whether file uses dot prefix
+   */
+  isDotFile: boolean;
+  /**
+   * Root directory of source files
+   */
+  sourceRoot: string;
+  /**
+   * Name of source file
+   */
+  sourceFileName: string;
+  /**
+   * Relative path to source file
+   */
+  sourcePath: string;
+  /**
+   * Full path to source file
+   */
+  sourceFile: string;
+  /**
+   * Root directory of target files
+   */
+  targetRoot: string;
+  /**
+   * Name of target file
+   */
+  targetFileName: string;
+  /**
+   * Relative path to target file
+   */
+  targetPath: string;
+  /**
+   * Full path to target file
+   */
+  targetFile: string;
+};
+```
+
+### `OverrideFileMeta`
+```ts
+/**
+ * Options to override default file writing behavior
+ */
+export type OverrideFileMeta = {
+  /**
+   * Whether to disable EJS rendering for EJS files
+   */
+  disableRenderEjs?: boolean;
+  /**
+   * Custom target file name
+   */
+  targetFileName?: string;
+  /**
+   * Whether to disable file writing
+   */
+  disableWrite?: boolean;
+};
+```
+
+### `Creator<T>`
+```ts
+/**
+ * Main class for handling project creation
+ * @template T - Type of custom data to extend with
+ */
+export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  start: [context: CreatorContext];
+  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  end: [context: CreatorContext];
+}> {
+  /**
+   * Create a new Creator instance
+   * @param options - Configuration options
+   */
+  constructor(options: CreatorOptions<T>);
+
+  /**
+   * Add file write interceptors
+   * @param paths - Glob patterns to match files
+   * @param interceptor - Interceptor callback function
+   * @returns The Creator instance for chaining
+   */
+  writeIntercept(
+    paths: string | string[],
+    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>
+  ): this;
+
+  /**
+   * Start the project creation process
+   */
+  create(): Promise<void>;
+}
 ```
 ### `CreatorContext`
 ```ts

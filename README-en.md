@@ -14,7 +14,7 @@ Create a creator.
 
 - 🗝 Simple and easy to use, concise design
 - 🛠️ Template-based project generation
-- ⚙️ Interactive CLI prompts for configuration
+- ⚙️ Interactive CLI configuration
 - 📦 Supports multiple templates
 - 🧩 EJS template rendering
 
@@ -80,8 +80,8 @@ my-creator
 └── vite.config.mts
 ```
 
-- Open `src/index.ts` to customize project creation logic
-- Open `src/templates` to start writing template files
+- Open `src/index.ts` to customize creation logic
+- Open `src/templates` to write template files
 
 ## Examples
 
@@ -90,7 +90,7 @@ my-creator
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
       // Add custom data
@@ -100,6 +100,7 @@ export async function createCLI() {
       };
     }
   });
+  await creator.create();
 }
 ```
 
@@ -116,20 +117,19 @@ Created at: <%= timestamp %>
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
-    canWrite(meta, data) {
-      if (data.codeLinter === 'eslint' && meta.targetPath.includes('biome')) {
-        return false;
-      }
-
-       if (data.codeLinter === 'biome' && meta.targetPath.includes('eslint')) {
-        return false;
-      }
-
-      return true;
-    }
   });
+
+  creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'eslint',
+  }));
+
+  creator.writeIntercept(['biome*'], (meta, data) => ({
+    disableWrite: data.codeLinter !== 'biome',
+  }));
+
+  await creator.create();
 }
 ```
 
@@ -138,17 +138,22 @@ export async function createCLI() {
 ```ts
 // src/index.ts
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     onWritten(meta, data) {
       console.log(`Created file: ${meta.targetPath}`);
     }
   });
+
+  creator.on('written', (meta, data) => {
+    console.log(`Writing file: ${meta.targetPath}`);
+  });
+
+  await creator.create();
 }
 ```
 
 ### Custom CLI Selection
-
 ```ts
 // src/index.ts
 import { promptsSafe } from 'create-creator';
@@ -180,7 +185,6 @@ export async function createCLI() {
 }
 ```
 
-
 ### Dot Files
 Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with _ to handle them correctly in templates.
 ```bash
@@ -199,12 +203,10 @@ templates/default/
 └── README.md
 ```
 
-
 ## API
 
 ### `createCreator<T>(options: CreatorOptions<T>): Promise<void>`
-
-create a new project creator.
+Create a creator.
 
 ### `CreatorOptions<T>`
 ```ts
@@ -236,21 +238,131 @@ export type CreatorOptions<T> = {
   /**
    * Control which files should be written
    */
-  canWrite?: (meta: WriteMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
+  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
   /**
    * Custom file writing implementation
    */
-  doWrite?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
+  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
   /**
    * Callback after each file is written
    */
-  onWritten?: (meta: WriteMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
+  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
   /**
    * Callback after template generation completes
    */
   onEnd?: (context: CreatorContext) => unknown | Promise<unknown>;
 };
 ```
+
+### `FileMeta`
+```ts
+/**
+ * Metadata about files being processed
+ */
+export type FileMeta = {
+  /**
+   * Whether file uses EJS templating
+   */
+  isEjsFile: boolean;
+  /**
+   * Whether file uses underscore prefix
+   */
+  isUnderscoreFile: boolean;
+  /**
+   * Whether file uses dot prefix
+   */
+  isDotFile: boolean;
+  /**
+   * Root directory of source files
+   */
+  sourceRoot: string;
+  /**
+   * Name of source file
+   */
+  sourceFileName: string;
+  /**
+   * Relative path to source file
+   */
+  sourcePath: string;
+  /**
+   * Full path to source file
+   */
+  sourceFile: string;
+  /**
+   * Root directory of target files
+   */
+  targetRoot: string;
+  /**
+   * Name of target file
+   */
+  targetFileName: string;
+  /**
+   * Relative path to target file
+   */
+  targetPath: string;
+  /**
+   * Full path to target file
+   */
+  targetFile: string;
+};
+```
+
+### `OverrideFileMeta`
+```ts
+/**
+ * Options to override default file writing behavior
+ */
+export type OverrideFileMeta = {
+  /**
+   * Whether to disable EJS rendering for EJS files
+   */
+  disableRenderEjs?: boolean;
+  /**
+   * Custom target file name
+   */
+  targetFileName?: string;
+  /**
+   * Whether to disable file writing
+   */
+  disableWrite?: boolean;
+};
+```
+
+### `Creator<T>`
+```ts
+/**
+ * Main class for handling project creation
+ * @template T - Type of custom data to extend with
+ */
+export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  start: [context: CreatorContext];
+  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  end: [context: CreatorContext];
+}> {
+  /**
+   * Create a new Creator instance
+   * @param options - Configuration options
+   */
+  constructor(options: CreatorOptions<T>);
+
+  /**
+   * Add file write interceptors
+   * @param paths - Glob patterns to match files
+   * @param interceptor - Interceptor callback function
+   * @returns The Creator instance for chaining
+   */
+  writeIntercept(
+    paths: string | string[],
+    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>
+  ): this;
+
+  /**
+   * Start the project creation process
+   */
+  create(): Promise<void>;
+}
+```
+
 ### `CreatorContext`
 ```ts
 /**
@@ -312,51 +424,6 @@ export type CreatorContext = {
 };
 ```
 
-### `WriteMeta`
-```ts
-/**
- * Metadata about files being processed
- */
-export type WriteMeta = {
-  /**
-   * Whether file uses EJS templating
-   */
-  isEjsFile: boolean;
-  /**
-   * Whether file uses underscore prefix
-   */
-  isUnderscoreFile: boolean;
-  /**
-   * Whether file uses dot prefix
-   */
-  isDotFile: boolean;
-  /**
-   * Full path to source file
-   */
-  sourceFile: string;
-  /**
-   * Relative path to source file
-   */
-  sourcePath: string;
-  /**
-   * Root directory of source files
-   */
-  sourceRoot: string;
-  /**
-   * Full path to target file
-   */
-  targetFile: string;
-  /**
-   * Relative path to target file
-   */
-  targetPath: string;
-  /**
-   * Root directory of target files
-   */
-  targetRoot: string;
-};
-```
-
 ### `CreatorData<T>`
 ```ts
 /**
@@ -366,20 +433,6 @@ export type WriteMeta = {
 export type CreatorData<T> = {
   ctx: CreatorContext;
 } & T;
-```
-
-### Template Variables
-
-The following variables are available in EJS templates:
-
-- `ctx`: The creation context (`CreatorContext`)
-- Custom data returned from `extendData: () => ({ timestamp: Date.now() })`
-
-Example template (README.md.ejs):
-```ejs
-# <%= ctx.projectName %>
-
-Created at: <%= timestamp %>
 ```
 
 ### `selectNodeVersion(versions?: number[]): Promise<number>`
