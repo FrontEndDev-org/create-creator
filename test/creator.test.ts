@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as clackPrompts from '@clack/prompts';
+import fse from 'fs-extra';
 import * as colors from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { Creator } from '../src';
@@ -16,16 +17,13 @@ const linter = Math.random().toString();
 const projectName = Math.random().toString();
 
 beforeAll(async () => {
-  fs.mkdirSync(testRoot, { recursive: true });
   templatesRoot = fs.mkdtempSync(path.join(testRoot, 'templates-'));
   templateRoot = path.join(templatesRoot, 'default');
-  fs.mkdirSync(templateRoot, { recursive: true });
   // 创建测试模板文件
-  fs.writeFileSync(path.join(templateRoot, 'file1.txt.ejs'), 'Hello <%= ctx.projectName %>');
-  fs.writeFileSync(path.join(templateRoot, '__file2.txt.ejs'), 'Hello <%= ctx.projectName %>');
-  fs.writeFileSync(path.join(templateRoot, '_file3.txt.ejs'), 'Hello <%= ctx.projectName %>');
-  fs.mkdirSync(path.join(templateRoot, 'path/to'), { recursive: true });
-  fs.writeFileSync(path.join(templateRoot, 'path/to/file4.txt'), 'Hello <%= ctx.projectName %>');
+  fse.outputFileSync(path.join(templateRoot, 'file1.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fse.outputFileSync(path.join(templateRoot, '__file2.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fse.outputFileSync(path.join(templateRoot, '_file3.txt.ejs'), 'Hello <%= ctx.projectName %>');
+  fse.outputFileSync(path.join(templateRoot, 'path/to/file4.txt'), 'Hello <%= ctx.projectName %>');
 });
 
 afterAll(() => {
@@ -170,8 +168,7 @@ it('应该支持自定义扩展数据', async () => {
       const customValue = Math.random().toString();
       const mockExtendData = vi.fn().mockResolvedValue({ customValue });
 
-      fs.mkdirSync(templateRoot, { recursive: true });
-      fs.writeFileSync(path.join(templateRoot, `${fileName}.ejs`), '<%= customValue %>');
+      fse.outputFileSync(path.join(templateRoot, `${fileName}.ejs`), '<%= customValue %>');
 
       const creator = new Creator({
         cwd,
