@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import * as creatorModule from '../src/Creator';
+import * as creatorErrorModule from '../src/CreatorError';
 import * as cliModule from '../src/cli';
 import * as constModule from '../src/const';
-import * as creatorModule from '../src/creator';
 import * as index from '../src/index';
 import * as promptsModule from '../src/prompts';
 
@@ -42,4 +43,11 @@ it('should re-export creator types', () => {
   expectTypeOf<IndexCreatorContext>().toEqualTypeOf<creatorModule.CreatorContext>();
   expectTypeOf<IndexWriteMeta>().toEqualTypeOf<creatorModule.FileMeta>();
   expectTypeOf<IndexCreatorData>().toEqualTypeOf<creatorModule.CreatorData<unknown>>();
+});
+
+it('should re-export all CreatorError exports', () => {
+  for (const [key, value] of Object.entries(creatorErrorModule)) {
+    if (key === 'default') continue;
+    expect(index[key as keyof typeof index]).toBe(value);
+  }
 });
