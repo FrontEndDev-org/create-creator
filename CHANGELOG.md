@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/FrontEndDev-org/create-creator/compare/v2.2.0...v2.2.1) (2025-01-20)
+
+
+### Bug Fixes
+
+* **naming:** 将 createCli 函数重命名为 createCLI ([7a903c3](https://github.com/FrontEndDev-org/create-creator/commit/7a903c3dca92343e81e23b37c1becd061623dd5b))
+
 ## [2.2.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.1.0...v2.2.0) (2025-01-20)
 
 
