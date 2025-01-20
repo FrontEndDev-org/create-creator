@@ -9,6 +9,11 @@ export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
+    checkNodeVersion: 18,
+    checkUpdate: {
+      name: pkgName,
+      version: pkgVersion,
+    },
     async extendData({ prompts }) {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
