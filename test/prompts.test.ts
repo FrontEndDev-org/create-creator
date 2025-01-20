@@ -6,7 +6,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { selectCodeLinter, selectNodeVersion, selectNpmRegistry, selectWriteMode } from '../src/prompts';
 import { runTest } from './helpers';
 
-vi.mock('@clack/prompts');
+beforeAll(() => {
+  vi.mock('@clack/prompts');
+});
+
+afterAll(() => {
+  vi.clearAllMocks();
+});
 
 afterEach(() => {
   vi.clearAllMocks();

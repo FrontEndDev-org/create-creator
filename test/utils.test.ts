@@ -11,7 +11,7 @@ let testDir: string;
 beforeAll(async () => {
   // 创建临时目录
   fs.mkdirSync(testRoot, { recursive: true });
-  tempDir = fs.mkdtempSync(path.join(testRoot, 'test-utils-'));
+  tempDir = fs.mkdtempSync(path.join(testRoot, 'utils-'));
 
   // 创建测试文件
   testFile = path.join(tempDir, 'test-file.txt');
