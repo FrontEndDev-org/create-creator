@@ -1,19 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path/posix';
 import process from 'node:process';
-import * as prompts from '@clack/prompts';
 import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
-import * as colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
+import { CreatorError } from './CreatorError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
-import { selectWriteMode } from './prompts';
+import { colors, prompts, selectWriteMode } from './prompts';
 import { type CheckPkgUpdate, checkNodeVersion, checkPkgVersion, execCommand, isDirectory } from './utils';
-
-export type Prompts = typeof prompts;
-export type Colors = typeof colors;
 
 /**
  * File write mode options
@@ -58,21 +54,9 @@ export type CreatorContext = {
    */
   packageName: string;
   /**
-   * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
-   */
-  prompts: Prompts;
-  /**
-   * Color utilities instance @see https://www.npmjs.com/package/picocolors
-   */
-  colors: Colors;
-  /**
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
-  /**
-   * Utility function to execute shell commands
-   */
-  execCommand: typeof execCommand;
 };
 
 const builtinDataKey = 'ctx';
@@ -218,10 +202,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     projectPath: '',
     projectName: '',
     packageName: '',
-    prompts,
-    colors,
     writeMode: 'cancel',
-    execCommand,
   };
   data: CreatorData<T>;
 
@@ -269,8 +250,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       const adapted = checkNodeVersion(options.checkNodeVersion);
 
       if (!adapted) {
-        prompts.cancel(`Your Node.js version is old, please upgrade to ${options.checkNodeVersion} or newer.`);
-        process.exit(1);
+        throw new CreatorError(`Your Node.js version is old, please upgrade to ${options.checkNodeVersion} or higher`);
       }
     }
 
@@ -283,16 +263,14 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
       if (err) {
         spinner.stop('检查版本更新失败', 1);
-        prompts.cancel(`Failed to check for updates: ${err.message}`);
-        process.exit(1);
-      } else {
-        spinner.stop('检查版本更新成功', 0);
+        throw new CreatorError(`Failed to check for updates: ${err.message}`);
+      }
 
-        if (version !== newVersion) {
-          const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
-          prompts.cancel(`New version ${newVersion} is available, please use \`${command}\` instead.`);
-          process.exit(1);
-        }
+      spinner.stop('检查版本更新成功', 0);
+
+      if (version !== newVersion) {
+        const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
+        throw new CreatorError(`New version ${newVersion} is available, please use \`${command}\` instead.`);
       }
     }
   }
@@ -311,8 +289,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         await fse.emptyDir(context.projectRoot);
         break;
       case 'cancel':
-        process.exit(0);
-        break;
+        throw new CreatorError('Canceled by user', 0);
       default:
         break;
     }
@@ -325,8 +302,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       const externalData = await options.extendData?.call(null, context);
 
       if (externalData !== undefined && builtinDataKey in externalData) {
-        prompts.cancel(`Extended data cannot contain the internal key name "${builtinDataKey}"`);
-        process.exit(1);
+        throw new CreatorError(`Extended data cannot contain the internal key name "${builtinDataKey}"`);
       }
 
       this.data = {
@@ -348,8 +324,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify selected template contains files
     if (paths.length === 0) {
-      prompts.cancel(`Template "${context.templateName}" is empty - add project files to ${context.templateRoot}`);
-      process.exit(1);
+      throw new CreatorError(
+        `Template "${context.templateName}" is empty - add project files to ${context.templateRoot}`,
+      );
     }
 
     for (const sourcePath of paths) {
@@ -425,17 +402,16 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     await this.emit('written', fileMeta, this.data, overrideFileMeta);
   }
 
-  async create() {
+  async #create() {
     const { context, options } = this;
 
     await this.emit('before', context);
 
     // Verify templates root directory exists and is accessible
     if (isDirectory(context.templatesRoot) === false) {
-      prompts.cancel(
+      throw new CreatorError(
         `Invalid templates directory "${context.templatesRoot}" - create a templates folder containing your project templates`,
       );
-      process.exit(1);
     }
 
     // Scan templates root directory for valid template folders
@@ -450,10 +426,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify templates directory contains at least one valid template
     if (templateNames.length === 0) {
-      prompts.cancel(
+      throw new CreatorError(
         `No templates found in "${context.templatesRoot}" - add template folders containing your project files`,
       );
-      process.exit(1);
     }
 
     if (templateNames.length === 1) {
@@ -476,5 +451,19 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     await this.#extend();
     await this.#generate();
     await this.emit('end', context);
+  }
+
+  async create() {
+    const [err] = await tryFlatten(this.#create());
+
+    if (!err) return process.exit(0);
+
+    prompts.cancel(err.message);
+
+    if (err instanceof CreatorError) {
+      process.exit(err.exitCode);
+    } else {
+      process.exit(1);
+    }
   }
 }

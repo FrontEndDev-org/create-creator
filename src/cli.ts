@@ -1,8 +1,9 @@
 import path from 'node:path/posix';
 import process from 'node:process';
+import { Creator } from './Creator';
+import { CreatorError } from './CreatorError';
 import { pkgDescription, pkgName, pkgVersion } from './const';
-import { Creator } from './creator';
-import { selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
+import { colors, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 import { execCommand, isDirectory } from './utils';
 
 export async function createCLI() {
@@ -14,7 +15,7 @@ export async function createCLI() {
       name: pkgName,
       version: pkgVersion,
     },
-    async extendData({ prompts }) {
+    async extendData() {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
       const codeLinter = await selectCodeLinter();
@@ -27,22 +28,21 @@ export async function createCLI() {
     },
   });
 
-  creator.on('before', ({ prompts, colors }) => {
+  creator.on('before', () => {
     prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
     prompts.log.info(pkgDescription);
   });
 
-  creator.on('end', async ({ prompts, colors, projectRoot, projectPath }) => {
+  creator.on('end', async ({ projectRoot, projectPath }) => {
     if (!isDirectory(path.join(projectRoot, '.git'))) {
       const [err, { stderr, exitCode }] = await execCommand('git init', { cwd: projectRoot });
 
       if (err) {
         prompts.log.error(stderr);
-        prompts.cancel('Failed to initialize git repository');
-        process.exit(exitCode);
-      } else {
-        prompts.log.success('Git repository initialized');
+        throw new CreatorError('Failed to initialize git repository');
       }
+
+      prompts.log.success('Git repository initialized');
     }
 
     prompts.log.success('The project has been created successfully!');

@@ -1,11 +1,16 @@
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
-import type { WriteMode } from './creator';
+import type { WriteMode } from './Creator';
+import { CreatorError } from './CreatorError';
+
+export type Prompts = typeof prompts;
+export type Colors = typeof colors;
+export { prompts, colors };
 
 export async function promptsSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
-  if (prompts.isCancel(r)) process.exit(0);
+  if (prompts.isCancel(r)) throw new CreatorError('Operation cancelled');
   return r;
 }
 

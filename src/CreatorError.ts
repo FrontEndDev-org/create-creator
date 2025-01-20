@@ -1,4 +1,6 @@
-export class CreateError extends Error {
+import { prompts } from './prompts';
+
+export class CreatorError extends Error {
   exitCode: number;
   constructor(message: string, exitCode = 0) {
     super(message);
