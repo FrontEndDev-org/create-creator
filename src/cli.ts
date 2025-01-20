@@ -50,16 +50,16 @@ export async function createCli() {
     prompts.outro('🎉🎉🎉');
   });
 
-  creator.writeIntercept(['default/templates/**/*.ejs'], (meta, data) => ({
+  creator.writeIntercept(['*/templates/**/*.ejs'], (meta, data) => ({
     disableRenderEjs: true,
     targetFileName: meta.sourceFileName,
   }));
 
-  creator.writeIntercept(['**/eslint*', '**/prettier*', '**/_prettier*'], (meta, data) => ({
+  creator.writeIntercept(['*/eslint*', '*/prettier*', '*/_prettier*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
-  creator.writeIntercept(['**/biome.*'], (meta, data) => ({
+  creator.writeIntercept(['*/biome.*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
 
