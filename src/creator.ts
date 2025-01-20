@@ -195,8 +195,9 @@ const EJS_FILE_REGEX = /\.ejs$/i;
  * @template T - Type of custom data to extend with
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  before: [context: CreatorContext];
   start: [context: CreatorContext];
-  written: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
   end: [context: CreatorContext];
 }> {
   context: CreatorContext = {
@@ -379,6 +380,8 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   async create() {
     const { context, options } = this;
 
+    await this.emit('before', context);
+
     // Verify templates root directory exists and is accessible
     if (isDirectory(context.templatesRoot) === false) {
       prompts.cancel(
@@ -405,20 +408,21 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       process.exit(1);
     }
 
-    await this.emit('start', context);
+    if (templateNames.length === 1) {
+      context.templateName = templateNames[0];
+    } else {
+      context.templateName = (await prompts.select({
+        message: 'Select a template',
+        options: templateNames.map((name) => ({
+          value: name,
+          label: name,
+        })),
+      })) as string;
+    }
 
-    context.templateName =
-      templateNames.length === 1
-        ? templateNames[0]
-        : ((await prompts.select({
-            message: 'Select a template',
-            options: templateNames.map((name) => ({
-              value: name,
-              label: name,
-            })),
-          })) as string);
     context.templateRoot = normalizePath(path.join(context.templatesRoot, context.templateName));
 
+    await this.emit('start', context);
     await this.#check();
     await this.#extend();
     await this.#generate();

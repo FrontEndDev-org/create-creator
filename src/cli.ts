@@ -22,7 +22,7 @@ export async function createCLI() {
     },
   });
 
-  creator.on('start', ({ prompts, colors }) => {
+  creator.on('before', ({ prompts, colors }) => {
     prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
     prompts.log.info(pkgDescription);
   });
