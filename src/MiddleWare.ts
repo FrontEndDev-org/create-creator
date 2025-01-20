@@ -1,6 +1,6 @@
 import { minimatch } from 'minimatch';
 
-export type MiddleWareCallback<I extends unknown[], O> = (...args: I) => O | Promise<O>;
+export type MiddleWareInterceptor<I extends unknown[], O> = (...args: I) => O | Promise<O>;
 export type MiddleWareOptions = {
   cwd: string;
 };
@@ -11,10 +11,10 @@ export class MiddleWare<I extends unknown[], O> {
 
   #hooks: {
     patterns: string[];
-    callback: MiddleWareCallback<I, O>;
+    callback: MiddleWareInterceptor<I, O>;
   }[] = [];
 
-  match(patterns: string | string[], callback: MiddleWareCallback<I, O>) {
+  match(patterns: string | string[], callback: MiddleWareInterceptor<I, O>) {
     this.#hooks.push({
       patterns: Array.isArray(patterns) ? patterns : [patterns],
       callback,

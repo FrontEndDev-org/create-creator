@@ -7,7 +7,7 @@ import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
-import { MiddleWare, type MiddleWareCallback } from './MiddleWare';
+import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { selectWriteMode } from './prompts';
 import {
@@ -263,7 +263,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
   writeIntercept(
     paths: string | string[],
-    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>,
+    interceptor: MiddleWareInterceptor<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>,
   ) {
     this.#writeMW.match(paths, interceptor);
     return this;
