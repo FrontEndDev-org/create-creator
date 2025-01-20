@@ -327,42 +327,44 @@ it('外置模板源', async () => {
     const createViteRoot = path.join(npmRoot, 'node_modules/create-vite');
     const templatesRoot = fs.mkdtempSync(path.join(cwd, 'templates-'));
     const projectRoot = fs.mkdtempSync(path.join(cwd, 'project-'));
-
-    // 安装 create-vite
-    fse.outputFileSync(
-      path.join(npmRoot, 'package.json'),
-      JSON.stringify({
-        name: 'test-templates',
-        version: '1.0.0',
-      }),
-    );
-    cp.execSync('npm install create-vite@6.1.1', { cwd: npmRoot });
-
-    // 移动模板文件到模板根目录
-    const dirs = fse.readdirSync(createViteRoot).filter((name) => name.startsWith('template-'));
-    const templateName = dirs[0];
-
-    for (const dir of dirs) {
-      fse.moveSync(path.join(createViteRoot, dir), path.join(templatesRoot, dir));
-    }
-
-    // 读取 package.json
-    const originPkg = fse.readJsonSync(path.join(templatesRoot, templateName, 'package.json')) as {
-      name: string;
-    };
-    vi.spyOn(clackPrompts, 'select').mockResolvedValue(templateName);
+    let templateName = '';
 
     // 执行创建
     const creator = new Creator({
       cwd: projectRoot,
       templatesRoot: templatesRoot,
     });
+
+    creator.on('before', async ({ execCommand }) => {
+      // 安装 create-vite
+      fse.outputFileSync(
+        path.join(npmRoot, 'package.json'),
+        JSON.stringify({
+          name: 'test-templates',
+          version: '1.0.0',
+        }),
+      );
+      await execCommand('npm install create-vite@6.1.1', { cwd: npmRoot });
+
+      // 移动模板文件到模板根目录
+      const dirs = fse.readdirSync(createViteRoot).filter((name) => name.startsWith('template-'));
+      templateName = dirs[0];
+      vi.spyOn(clackPrompts, 'select').mockResolvedValue(templateName);
+
+      for (const dir of dirs) {
+        fse.moveSync(path.join(createViteRoot, dir), path.join(templatesRoot, dir));
+      }
+    });
+
     await creator.create();
+
+    // 验证项目名
+    const originPkg = fse.readJsonSync(path.join(templatesRoot, templateName, 'package.json')) as {
+      name: string;
+    };
     const projectPkg = fse.readJsonSync(path.join(projectRoot, 'package.json')) as {
       name: string;
     };
-
-    // 验证项目名
     expect(projectPkg.name).toEqual(originPkg.name);
   });
 });
