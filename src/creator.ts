@@ -1,4 +1,3 @@
-import EventEmitter from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -7,7 +6,6 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
-import type { W } from 'vitest/dist/chunks/reporters.D7Jzd9GS.js';
 import { MiddleWare, type MiddleWareCallback } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { selectWriteMode } from './prompts';
