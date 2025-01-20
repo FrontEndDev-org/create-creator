@@ -15,6 +15,10 @@
   "bin": {
     "create-creator": "bin/index.cjs"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "engineStrict": true,
   "module": "./dist/index.mjs",
   "exports": {
     ".": {
