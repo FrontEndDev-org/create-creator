@@ -24,7 +24,7 @@
 npm create creator my-creator
 
 Need to install the following packages:
-create-creator@1.0.0
+create-creator@2.0.0
 Ok to proceed? (y)
 
 > npx
@@ -121,10 +121,12 @@ export async function createCLI() {
     // ... other options
   });
 
+  // 没有选择 eslint 的时候，不生成 eslint 相关文件
   creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
+  // 没有选择 biome 的时候，不生成 biome 相关文件
   creator.writeIntercept(['biome*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
@@ -133,7 +135,7 @@ export async function createCLI() {
 }
 ```
 
-### 打印写入文件日志
+### 打印相关日志
 
 ```ts
 // src/index.ts
@@ -145,8 +147,20 @@ export async function createCLI() {
     }
   });
 
-  creator.on('written', (meta, data) => {
-    console.log(`写入文件: ${meta.targetPath}`);
+  creator.on('before', ({prompts}) => {
+    prompts.log.info('输出一些 banner 信息');
+  });
+
+  creator.on('start', ({prompts}) => {
+    prompts.log.info('开始创建新工程');
+  });
+
+  creator.on('written', (meta, data, override) => {
+    data.ctx.prompts.log.info(`写入文件: ${meta.targetPath}`);
+  });
+
+  creator.on('end', ({prompts}, meta) => {
+    prompts.log.info('创建成功');
   });
 
   await creator.create();
