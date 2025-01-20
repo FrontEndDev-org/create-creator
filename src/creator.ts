@@ -275,23 +275,31 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     if (options.checkNodeVersion) {
       const adapted = checkNodeVersion(options.checkNodeVersion);
 
-      if (adapted) {
+      if (!adapted) {
         prompts.cancel(`Your Node.js version is old, please upgrade to ${options.checkNodeVersion} or newer.`);
         process.exit(1);
       }
     }
 
     if (options.checkUpdate) {
-      const { version, name, distTag, registry } = options.checkUpdate;
+      const { version, name, distTag = 'latest', registry } = options.checkUpdate;
+      const spinner = prompts.spinner();
+
+      spinner.start('检查版本更新...');
       const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
 
       if (err) {
+        spinner.stop('检查版本更新失败', 1);
         prompts.cancel(`Failed to check for updates: ${err.message}`);
         process.exit(1);
-      } else if (version !== newVersion) {
-        const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
-        prompts.cancel(`New version ${newVersion} is available, please use \`${command}\` instead.`);
-        process.exit(1);
+      } else {
+        spinner.stop('检查版本更新成功', 0);
+
+        if (version !== newVersion) {
+          const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
+          prompts.cancel(`New version ${newVersion} is available, please use \`${command}\` instead.`);
+          process.exit(1);
+        }
       }
     }
   }
@@ -399,7 +407,11 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
   async #write(fileMeta: FileMeta) {
     const { context, options } = this;
-    const overrideFileMeta = await this.#writeMW.when(fileMeta.sourcePath, fileMeta, this.data);
+    const overrideFileMeta = await this.#writeMW.when(
+      normalizePath(path.join(context.templateName, fileMeta.sourcePath)),
+      fileMeta,
+      this.data,
+    );
     const { disableRenderEjs, disableWrite, targetFileName } = overrideFileMeta || {};
 
     if (disableWrite) return;
