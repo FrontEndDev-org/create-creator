@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.2.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.1.0...v2.2.0) (2025-01-20)
+
+
+### Features
+
+* **cli:** 添加节点版本检查和自动更新检查 ([368604c](https://github.com/FrontEndDev-org/create-creator/commit/368604c9b0a16d85ee41cbdae82f0ef4f1e88d08))
+* **creator:** 添加版本检查和更新提示功能 ([7048580](https://github.com/FrontEndDev-org/create-creator/commit/7048580cdaf03efa81841c7f3ca583fbefffc9c1))
+* **error:** 创建自定义错误类 CreateError 并添加相关测试 ([f3ac1ea](https://github.com/FrontEndDev-org/create-creator/commit/f3ac1ea74dcb302487e627b53c1eefc710d9abe4))
+* **utils:** 添加 Node 版本检查功能并更新相关测试 ([13a5ec6](https://github.com/FrontEndDev-org/create-creator/commit/13a5ec656aa2d029a96f0a3d25817e6432f5a161))
+* **utils:** 添加检查包版本的工具函数 ([4801df0](https://github.com/FrontEndDev-org/create-creator/commit/4801df086d46332cfa23a60462c9a4d96c4f087c))
+
+
+### Bug Fixes
+
+* **create:** 修改文件路径匹配规则以提高兼容性 ([a88fd2f](https://github.com/FrontEndDev-org/create-creator/commit/a88fd2fa67cac07983ba54b2b73ec02bedb3b837))
+* **creator:** 优化 Node.js 版本检查和更新检查功能 ([4119baf](https://github.com/FrontEndDev-org/create-creator/commit/4119baf1f8208528f129aab93b9b91f8e28286f6))
+
 ## [2.1.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.0.0...v2.1.0) (2025-01-20)
 
 
