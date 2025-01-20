@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.0.0...v2.1.0) (2025-01-20)
+
+
+### Features
+
+* **creator:** 添加 before 事件并调整 create 方法 ([f7074e6](https://github.com/FrontEndDev-org/create-creator/commit/f7074e63d270ddc6e101ff7ff52eebe204d16b57))
+
 ## 2.0.0 (2025-01-20)
 
 
