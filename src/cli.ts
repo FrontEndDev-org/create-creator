@@ -6,7 +6,7 @@ import { pkgDescription, pkgName, pkgVersion } from './const';
 import { colors, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 import { execCommand, isDirectory } from './utils';
 
-export async function createCli() {
+export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),

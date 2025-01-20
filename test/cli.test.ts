@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path/posix';
 import process from 'node:process';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
-import { createCli } from '../src';
+import { createCLI } from '../src';
 import * as prompts from '../src/prompts.ts';
 import { isDirectory, isFile } from '../src/utils.ts';
 import { expectExit, runTest } from './helpers.ts';
@@ -34,7 +34,7 @@ it('创建新脚手架 + eslint', async () => {
     process.argv = ['', '', projectName];
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('eslint');
 
-    await expectExit(createCli());
+    await expectExit(createCLI());
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();
@@ -58,7 +58,7 @@ it('创建新脚手架 + biome', async () => {
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('biome');
     process.argv = ['', '', projectName];
 
-    await expectExit(createCli());
+    await expectExit(createCLI());
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();
