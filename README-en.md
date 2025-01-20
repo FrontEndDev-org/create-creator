@@ -8,7 +8,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![npm version](https://badge.fury.io/js/create-creator.svg)](https://npmjs.com/package/create-creator)
 
-A scaffolding generator.
+Create Creator.
 
 ## Features
 
@@ -60,32 +60,63 @@ my-creator
 ├── .nvmrc
 ├── README.md
 ├── bin
-│   └── index.cjs
+│   └── index.cjs
 ├── biome.jsonc
 ├── commitlint.config.mjs
 ├── lefthook.yml
 ├── package.json
 ├── src
-│   ├── const.ts
-│   ├── dts
-│   │   ├── global.d.ts
-│   │   └── types.d.ts
-│   └── index.ts
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
 ├── templates
-│   └── default
-│       └── README.md.ejs
+│   └── default
+│       └── README.md.ejs
 ├── test
-│   └── sample.test.ts
+│   └── sample.test.ts
 ├── tsconfig.json
 └── vite.config.mts
 ```
 
-- Open `src/index.ts` to customize creation logic
-- Open `src/templates` to write template files
+### Open `src/index.ts` to customize creation logic
+```ts
+import path from 'node:path/posix';
+import process from 'node:process';
+import { Creator, prompts, colors } from 'create-creator';
+import { pkgDescription, pkgName, pkgVersion } from './const';
+
+export async function createCLI() {
+  const creator = new Creator({
+    projectPath: process.argv[2],
+    templatesRoot: path.join(__dirname, '../templates'),
+  });
+
+  creator.on('before', () => {
+    prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
+    prompts.log.info(pkgDescription);
+  });
+
+  creator.on('end', ({ projectPath }) => {
+    prompts.log.success('The project has been created successfully!');
+    prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
+    prompts.outro('🎉🎉🎉');
+  });
+
+  // create method won't throw errors, no need to catch
+  await creator.create();
+}
+```
+
+### Open `src/templates` to write template files
+- templates is the root directory for templates
+- templates/default is a specific template directory, can be any name
+- If there are multiple directories under templates, users can choose during project creation
 
 ## Examples
 
-### Extend Custom Data
+### Extend custom data
 
 ```ts
 // src/index.ts
@@ -112,7 +143,7 @@ Created by: <%= author %>
 Created at: <%= timestamp %>
 ```
 
-### Conditional Template Rendering
+### Conditionally render different template files
 
 ```ts
 // src/index.ts
@@ -121,12 +152,12 @@ export async function createCLI() {
     // ... other options
   });
 
-  // Skip eslint files if eslint is not selected
+  // Don't generate eslint related files when eslint is not selected
   creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
-  // Skip biome files if biome is not selected
+  // Don't generate biome related files when biome is not selected
   creator.writeIntercept(['biome*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
@@ -148,7 +179,7 @@ export async function createCLI() {
   });
 
   creator.on('before', ({prompts}) => {
-    prompts.log.info('Display some banner information');
+    prompts.log.info('Output some banner information');
   });
 
   creator.on('start', ({prompts}) => {
@@ -167,7 +198,7 @@ export async function createCLI() {
 }
 ```
 
-### Custom CLI Interactions
+### Custom CLI selection interaction
 ```ts
 // src/index.ts
 import { promptsSafe } from 'create-creator';
@@ -199,8 +230,8 @@ export async function createCLI() {
 }
 ```
 
-### Dot Files
-To create dot files (e.g., .gitignore, .npmrc) in templates/default directory, prefix the filename with `_` since dot files are hidden in file systems.
+### Dot files
+Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with _ for proper handling in templates.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -208,8 +239,8 @@ templates/default/
 └── README.md
 ```
 
-### Underscore Files
-To create underscore-prefixed files in `templates`, use double underscores (`__*`) since single underscore is reserved for dot files.
+### Underscore files
+In `templates`, creating dot files requires _* prefix, so creating underscore (_*) files requires double underscore prefix (__*).
 ```bash
 templates/default/
 ├── __gitignore -> _gitignore
@@ -218,13 +249,37 @@ templates/default/
 ```
 
 ## API
+
+### Creator Class
 ```ts
-const creator = new Creator<T>(CreatorOptions<T>)
-// ...
-await creator.create();
+class Creator<T extends Record<string, unknown>> {
+  constructor(options: CreatorOptions<T>);
+
+  /**
+   * Start project creation
+   */
+  create(): Promise<void>;
+
+  /**
+   * Intercept file writing
+   * @param paths File path patterns to intercept
+   * @param interceptor Interceptor function
+   */
+  writeIntercept(
+    paths: string | string[],
+    interceptor: WriteInterceptor
+  ): void;
+
+  /**
+   * Register event listeners
+   * @param event Event name
+   * @param listener Listener function
+   */
+  on(event: 'before' | 'start' | 'written' | 'end', listener: (...args: any[]) => void): void;
+}
 ```
 
-### `CreatorOptions<T>`
+### CreatorOptions<T>
 ```ts
 /**
  * Configuration options for the creator
@@ -276,6 +331,7 @@ export type FileMeta = {
    * Whether file uses dot prefix
    */
   isDotFile: boolean;
+
   /**
    * Root directory of source files
    */
@@ -292,6 +348,7 @@ export type FileMeta = {
    * Full path to source file
    */
   sourceFile: string;
+
   /**
    * Root directory of target files
    */
@@ -321,12 +378,15 @@ export type OverrideFileMeta = {
    * Whether to disable EJS rendering for EJS files
    */
   disableRenderEjs?: boolean;
+
   /**
-   * Custom target file name
+   * Specify target file name
    */
   targetFileName?: string;
+
   /**
    * Whether to disable file writing
+   * When true, other configurations will be ignored
    */
   disableWrite?: boolean;
 };
@@ -371,25 +431,9 @@ export type CreatorContext = {
    */
   packageName: string;
   /**
-   * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
-   */
-  prompts: Prompts;
-  /**
-   * Color utilities instance @see https://www.npmjs.com/package/picocolors
-   */
-  colors: Colors;
-  /**
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
-  /**
-   * Utility function to execute shell commands
-   */
-  execCommand: (command: string, options?: ExecOptions) => Promise<[Error | null, {
-      stderr: string;
-      stdout: string;
-      exitCode: number;
-  }]>;
 };
 ```
 
@@ -400,8 +444,18 @@ export type CreatorContext = {
  * @template T - Type of custom data to extend with
  */
 export type CreatorData<T> = {
+  /**
+   * The creation context
+   */
   ctx: CreatorContext;
 } & T;
+```
+
+### CreatorError Class
+```ts
+class CreatorError extends Error {
+  constructor(message: string);
+}
 ```
 
 ### Events
@@ -412,14 +466,14 @@ Triggered before creation
 Triggered when creation starts
 
 #### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
-Triggered after file is written
+Triggered after file writing
 
 #### `creator.on('end', (context: CreatorContext) => unknown)`
-Triggered when creation completes
+Triggered when creation ends
 
 ### Interceptors
 #### `writeIntercept(paths: string | string[], interceptor: WriteInterceptor)`
-Intercept file writing. Example:
+Intercept file writing. For example:
 
 - If `ssr` is configured, generate `src/client.ts` and `src/server.ts`
 - Otherwise
@@ -427,7 +481,7 @@ Intercept file writing. Example:
   - If source file is `server.ts`, skip generation
 
 ```ts
-creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
+creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) => {
   if (data.ssr) return {};
 
   return fileMeta.sourceFileName === 'client.ts'
@@ -442,18 +496,46 @@ creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
 })
 ```
 
-### CLI Interactions
-#### `selectNodeVersion(versions?: number[]): Promise<number>`
-CLI interaction to select Node.js version.
+### Utility Methods
+```ts
+/**
+ * Safely execute prompts operations
+ */
+function promptsSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
 
-#### `selectNpmRegistry(registries?: string[]): Promise<string>`
-CLI interaction to select npm registry.
+/**
+ * Select Node.js version
+ */
+function selectNodeVersion(versions?: number[]): Promise<number>;
 
-#### `selectCodeLinter(linters?: string[]): Promise<string>`
-CLI interaction to select code linter.
+/**
+ * Select npm registry
+ */
+function selectNpmRegistry(registries?: string[]): Promise<string>;
 
-#### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
-CLI interaction to select file write mode when directory is not empty.
+/**
+ * Select code linter
+ */
+function selectCodeLinter(linters?: string[]): Promise<string>;
+
+/**
+ * Select file write mode
+ */
+function selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>;
+
+/**
+ * Execute shell command
+ */
+function execCommand(
+  command: string,
+  options?: ExecOptions
+): Promise<[Error | null, { stderr: string; stdout: string; exitCode: number }]>;
+```
+
+## Links
+- [prompts](https://www.npmjs.com/package/@clack/prompts)
+- [colors](https://www.npmjs.com/package/picocolors)
+
 
 ## License
 

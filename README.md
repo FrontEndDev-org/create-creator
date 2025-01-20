@@ -80,8 +80,39 @@ my-creator
 └── vite.config.mts
 ```
 
-- 打开 `src/index.ts` 自定义创建逻辑
-- 打开 `src/templates` 编写模板文件
+### 打开 `src/index.ts` 自定义创建逻辑
+```ts
+import path from 'node:path/posix';
+import process from 'node:process';
+import { Creator, prompts, colors } from 'create-creator';
+import { pkgDescription, pkgName, pkgVersion } from './const';
+
+export async function createCLI() {
+  const creator = new Creator({
+    projectPath: process.argv[2],
+    templatesRoot: path.join(__dirname, '../templates'),
+  });
+
+  creator.on('before', () => {
+    prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
+    prompts.log.info(pkgDescription);
+  });
+
+  creator.on('end', ({ projectPath }) => {
+    prompts.log.success('The project has been created successfully!');
+    prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
+    prompts.outro('🎉🎉🎉');
+  });
+
+  // create 方法不会抛错，不必捕获
+  await creator.create();
+}
+```
+
+### 打开 `src/templates` 编写模板文件
+- templates 是模板根目录
+- templates/default 是一个具体模板目录，可以是任意名称
+- 如果 templates 下有多个目录，则会在创建项目时以供用户选择
 
 ## 示例
 
@@ -218,13 +249,37 @@ templates/default/
 ```
 
 ## API
+
+### Creator 类
 ```ts
-const creator = new Creator<T>(CreatorOptions<T>)
-// ...
-await creator.create();
+class Creator<T extends Record<string, unknown>> {
+  constructor(options: CreatorOptions<T>);
+
+  /**
+   * 开始创建项目
+   */
+  create(): Promise<void>;
+
+  /**
+   * 拦截文件写入
+   * @param paths 要拦截的文件路径模式
+   * @param interceptor 拦截器函数
+   */
+  writeIntercept(
+    paths: string | string[],
+    interceptor: WriteInterceptor
+  ): void;
+
+  /**
+   * 注册事件监听器
+   * @param event 事件名称
+   * @param listener 监听器函数
+   */
+  on(event: 'before' | 'start' | 'written' | 'end', listener: (...args: any[]) => void): void;
+}
 ```
 
-### `CreatorOptions<T>`
+### CreatorOptions<T>
 ```ts
 /**
  * Configuration options for the creator
@@ -276,6 +331,7 @@ export type FileMeta = {
    * Whether file uses dot prefix
    */
   isDotFile: boolean;
+
   /**
    * Root directory of source files
    */
@@ -321,12 +377,15 @@ export type OverrideFileMeta = {
    * Whether to disable EJS rendering for EJS files
    */
   disableRenderEjs?: boolean;
+
   /**
-   * Custom target file name
+   * Specify target file name
    */
   targetFileName?: string;
+
   /**
    * Whether to disable file writing
+   * When true, other configurations will be ignored
    */
   disableWrite?: boolean;
 };
@@ -371,25 +430,9 @@ export type CreatorContext = {
    */
   packageName: string;
   /**
-   * CLI prompts instance @see https://www.npmjs.com/package/@clack/prompts
-   */
-  prompts: Prompts;
-  /**
-   * Color utilities instance @see https://www.npmjs.com/package/picocolors
-   */
-  colors: Colors;
-  /**
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
-  /**
-   * Utility function to execute shell commands
-   */
-  execCommand: (command: string, options?: ExecOptions) => Promise<[Error | null, {
-      stderr: string;
-      stdout: string;
-      exitCode: number;
-  }]>;
 };
 ```
 
@@ -400,10 +443,19 @@ export type CreatorContext = {
  * @template T - Type of custom data to extend with
  */
 export type CreatorData<T> = {
+  /**
+   * The creation context
+   */
   ctx: CreatorContext;
 } & T;
 ```
 
+### CreatorError 类
+```ts
+class CreatorError extends Error {
+  constructor(message: string);
+}
+```
 
 ### 事件
 #### `creator.on('before', (context: CreatorContext) => unknown)`
@@ -428,7 +480,7 @@ export type CreatorData<T> = {
   - 如果源文件是 `server.ts` 则不需要生成
 
 ```ts
-creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
+creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) => {
   if (data.ssr) return {};
 
   return fileMeta.sourceFileName === 'client.ts'
@@ -443,18 +495,45 @@ creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
 })
 ```
 
-### 命令行交互
-#### `selectNodeVersion(versions?: number[]): Promise<number>`
-命令行交互选择 node 版本。
+### 其他工具方法
+```ts
+/**
+ * 安全执行 prompts 操作
+ */
+function promptsSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
 
-#### `selectNpmRegistry(registries?: string[]): Promise<string>`
-命令行交互选择 npm 仓库地址。
+/**
+ * 选择 Node.js 版本
+ */
+function selectNodeVersion(versions?: number[]): Promise<number>;
 
-#### `selectCodeLinter(linters?: string[]): Promise<string>`
-命令行交互选择代码格式化工具。
+/**
+ * 选择 npm registry
+ */
+function selectNpmRegistry(registries?: string[]): Promise<string>;
 
-#### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
-命令行交互选择当目录不为空时文件的写入模式。
+/**
+ * 选择代码格式化工具
+ */
+function selectCodeLinter(linters?: string[]): Promise<string>;
+
+/**
+ * 选择文件写入模式
+ */
+function selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>;
+
+/**
+ * 执行 shell 命令
+ */
+function execCommand(
+  command: string,
+  options?: ExecOptions
+): Promise<[Error | null, { stderr: string; stdout: string; exitCode: number }]>;
+```
+
+## Links
+- [prompts](https://www.npmjs.com/package/@clack/prompts)
+- [colors](https://www.npmjs.com/package/picocolors)
 
 ## License
 
