@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
 import * as prompts from '@clack/prompts';
 import * as colors from 'picocolors';
 import { describe, expect, it, vi } from 'vitest';

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { checkNodeVersion, checkPkgVersion, execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
+import { checkNodeVersion, checkPkgVersion, execCommand, isDirectory, isFile } from '../src/utils';
 import { testRoot } from './helpers';
 
 let tempDir: string;
@@ -53,29 +53,6 @@ describe('文件检查', () => {
 
   it('应该对不存在的路径返回 false', () => {
     expect(isFile(path.join(tempDir, 'non-existent'))).toBe(false);
-  });
-});
-
-describe('路径标准化', () => {
-  it('应该将 Windows 路径转换为正斜杠', () => {
-    expect(normalizePath('path\\to\\file')).toBe('path/to/file');
-    expect(normalizePath('C:\\path\\to\\file')).toBe('C:/path/to/file');
-  });
-
-  it('应该处理混合路径', () => {
-    expect(normalizePath('path\\to/file')).toBe('path/to/file');
-    expect(normalizePath('path/to\\file')).toBe('path/to/file');
-  });
-
-  it('应该保持已标准化的路径不变', () => {
-    expect(normalizePath('path/to/file')).toBe('path/to/file');
-    expect(normalizePath('/path/to/file')).toBe('/path/to/file');
-  });
-
-  it('应该处理边界情况', () => {
-    expect(normalizePath('')).toBe('');
-    expect(normalizePath('/')).toBe('/');
-    expect(normalizePath('\\')).toBe('/');
   });
 });
 

@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'node:path/posix';
 import { expect, it, vi } from 'vitest';
 import { MiddleWare } from '../src/MiddleWare';
 

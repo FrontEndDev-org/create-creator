@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import ejs from 'ejs';
@@ -10,14 +10,7 @@ import { tryFlatten } from 'try-flatten';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { selectWriteMode } from './prompts';
-import {
-  type CheckPkgUpdate,
-  checkNodeVersion,
-  checkPkgVersion,
-  execCommand,
-  isDirectory,
-  normalizePath,
-} from './utils';
+import { type CheckPkgUpdate, checkNodeVersion, checkPkgVersion, execCommand, isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
@@ -241,14 +234,14 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   constructor(private readonly options: CreatorOptions<T>) {
     super();
 
-    const cwd = normalizePath(options.cwd || process.cwd());
-    const projectRoot = normalizePath(path.resolve(cwd, options.projectPath || '.'));
+    const cwd = path.normalize(options.cwd || process.cwd());
+    const projectRoot = path.resolve(cwd, options.projectPath || '.');
     const { context } = this;
 
     context.cwd = cwd;
-    context.templatesRoot = normalizePath(path.resolve(cwd, options.templatesRoot));
+    context.templatesRoot = path.resolve(cwd, options.templatesRoot);
     context.projectRoot = projectRoot;
-    context.projectPath = normalizePath(path.relative(cwd, projectRoot)) || '.';
+    context.projectPath = path.relative(cwd, projectRoot) || '.';
     context.projectName = path.basename(context.projectRoot);
     context.packageName = context.projectName.startsWith('create-')
       ? context.projectName
@@ -362,7 +355,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     for (const sourcePath of paths) {
       const sourceFileName = path.basename(sourcePath);
       const sourceFolder = path.dirname(sourcePath);
-      const sourceFile = normalizePath(path.join(context.templateRoot, sourcePath));
+      const sourceFile = path.join(context.templateRoot, sourcePath);
 
       const isEjsFile = EJS_FILE_REGEX.test(sourcePath);
       const isUnderscoreFile = sourcePath.startsWith(UNDERSCORE_FILE_PREFIX);
@@ -384,8 +377,8 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         prefix = '.';
       }
 
-      const targetPath = normalizePath(path.join(sourceFolder, prefix + sourceFileName.slice(start, end)));
-      const targetFile = normalizePath(path.join(context.projectRoot, targetPath));
+      const targetPath = path.join(sourceFolder, prefix + sourceFileName.slice(start, end));
+      const targetFile = path.join(context.projectRoot, targetPath);
 
       const fileMeta: FileMeta = {
         isDotFile,
@@ -408,7 +401,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   async #write(fileMeta: FileMeta) {
     const { context, options } = this;
     const overrideFileMeta = await this.#writeMW.when(
-      normalizePath(path.join(context.templateName, fileMeta.sourcePath)),
+      path.join(context.templateName, fileMeta.sourcePath),
       fileMeta,
       this.data,
     );
@@ -475,7 +468,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       })) as string;
     }
 
-    context.templateRoot = normalizePath(path.join(context.templatesRoot, context.templateName));
+    context.templateRoot = path.join(context.templatesRoot, context.templateName);
 
     await this.emit('start', context);
     await this.#prepare();

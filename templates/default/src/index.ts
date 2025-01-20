@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'node:path/posix';
 import process from 'node:process';
 import { Creator } from 'create-creator';
 import { pkgDescription, pkgName, pkgVersion } from './const';

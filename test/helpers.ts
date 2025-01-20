@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import os from 'node:os';
-import path from 'node:path';
+import path from 'node:path/posix';
 import process from 'node:process';
 
 export const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'test-root-'));

@@ -1,6 +1,6 @@
 import cp from 'node:child_process';
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
 import * as clackPrompts from '@clack/prompts';
 import fse from 'fs-extra';
 import * as colors from 'picocolors';

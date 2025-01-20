@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
 import process from 'node:process';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { createCLI } from '../src';

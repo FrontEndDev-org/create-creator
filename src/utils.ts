@@ -1,10 +1,6 @@
 import { type ChildProcess, type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
-import path from 'node:path';
-
-export function normalizePath(path: string) {
-  return path.replace(/\\/g, '/');
-}
+import path from 'node:path/posix';
 
 export function isDirectory(p: string): boolean {
   return fs.existsSync(p) && fs.statSync(p).isDirectory();
