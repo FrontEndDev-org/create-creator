@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { checkPkgVersion, execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
+import { checkNodeVersion, checkPkgVersion, execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
 import { testRoot } from './helpers';
 
 let tempDir: string;
@@ -25,74 +25,75 @@ beforeAll(async () => {
 afterAll(() => {
   // 清理临时目录
   fs.rmSync(tempDir, { recursive: true, force: true });
+  vi.clearAllMocks();
 });
 
-describe('isDirectory', () => {
-  it('should return true for directory', () => {
+describe('目录检查', () => {
+  it('应该对目录返回 true', () => {
     expect(isDirectory(testDir)).toBe(true);
   });
 
-  it('should return false for file', () => {
+  it('应该对文件返回 false', () => {
     expect(isDirectory(testFile)).toBe(false);
   });
 
-  it('should return false for non-existent path', () => {
+  it('应该对不存在的路径返回 false', () => {
     expect(isDirectory(path.join(tempDir, 'non-existent'))).toBe(false);
   });
 });
 
-describe('isFile', () => {
-  it('should return true for file', () => {
+describe('文件检查', () => {
+  it('应该对文件返回 true', () => {
     expect(isFile(testFile)).toBe(true);
   });
 
-  it('should return false for directory', () => {
+  it('应该对目录返回 false', () => {
     expect(isFile(testDir)).toBe(false);
   });
 
-  it('should return false for non-existent path', () => {
+  it('应该对不存在的路径返回 false', () => {
     expect(isFile(path.join(tempDir, 'non-existent'))).toBe(false);
   });
 });
 
-describe('normalizePath', () => {
-  it('should convert Windows paths to forward slashes', () => {
+describe('路径标准化', () => {
+  it('应该将 Windows 路径转换为正斜杠', () => {
     expect(normalizePath('path\\to\\file')).toBe('path/to/file');
     expect(normalizePath('C:\\path\\to\\file')).toBe('C:/path/to/file');
   });
 
-  it('should handle mixed paths', () => {
+  it('应该处理混合路径', () => {
     expect(normalizePath('path\\to/file')).toBe('path/to/file');
     expect(normalizePath('path/to\\file')).toBe('path/to/file');
   });
 
-  it('should leave already normalized paths unchanged', () => {
+  it('应该保持已标准化的路径不变', () => {
     expect(normalizePath('path/to/file')).toBe('path/to/file');
     expect(normalizePath('/path/to/file')).toBe('/path/to/file');
   });
 
-  it('should handle edge cases', () => {
+  it('应该处理边界情况', () => {
     expect(normalizePath('')).toBe('');
     expect(normalizePath('/')).toBe('/');
     expect(normalizePath('\\')).toBe('/');
   });
 });
 
-describe('execCommand', () => {
-  it('should execute command successfully', async () => {
+describe('命令执行', () => {
+  it('应该成功执行命令', async () => {
     const [error, result] = await execCommand('echo hello');
     expect(error).toBeNull();
     expect(result.stdout.trim()).toBe('hello');
     expect(result.stderr).toBe('');
   });
 
-  it('should handle command error', async () => {
+  it('应该处理命令错误', async () => {
     const [error, result] = await execCommand('invalid-command');
     expect(error).not.toBeNull();
     expect(result.stderr).not.toBe('');
   });
 
-  it('should work with options', async () => {
+  it('应该支持选项参数', async () => {
     const [error, result] = await execCommand('echo $TEST_VAR', {
       env: { TEST_VAR: 'test-value' },
     });
@@ -101,8 +102,8 @@ describe('execCommand', () => {
   });
 });
 
-describe('checkPkgVersion', () => {
-  it('should return package version from npm registry', async () => {
+describe('包版本检查', () => {
+  it('应该从 npm registry 返回包版本', async () => {
     const mockResponse = { version: '1.2.3' };
     const mockFetch = vi.fn().mockResolvedValue({
       json: () => Promise.resolve(mockResponse),
@@ -112,14 +113,14 @@ describe('checkPkgVersion', () => {
     const version = await checkPkgVersion({
       name: 'test-package',
       distTag: 'xxx',
-      registry: 'https://registry.npmjs.org',
+      registry: 'https://registry.yyy.org',
     });
 
     expect(version).toBe('1.2.3');
-    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/xxx?t=1234567890');
+    expect(mockFetch).toHaveBeenCalledWith('https://registry.yyy.org/test-package/xxx?t=1234567890');
   });
 
-  it('should use default distTag and registry when not provided', async () => {
+  it('当未提供 distTag 和 registry 时应该使用默认值', async () => {
     const mockResponse = { version: '1.0.0' };
     const mockFetch = vi.fn().mockResolvedValue({
       json: () => Promise.resolve(mockResponse),
@@ -132,5 +133,27 @@ describe('checkPkgVersion', () => {
 
     expect(version).toBe('1.0.0');
     expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest?t=1234567890');
+  });
+});
+
+describe('Node版本检查', () => {
+  it('当当前版本大于要求版本时应返回 true', () => {
+    vi.stubGlobal('process', { version: 'v18.0.0' });
+    expect(checkNodeVersion(16)).toBe(true);
+  });
+
+  it('当当前版本等于要求版本时应返回 true', () => {
+    vi.stubGlobal('process', { version: 'v16.0.0' });
+    expect(checkNodeVersion(16)).toBe(true);
+  });
+
+  it('当当前版本小于要求版本时应返回 false', () => {
+    vi.stubGlobal('process', { version: 'v14.0.0' });
+    expect(checkNodeVersion(16)).toBe(false);
+  });
+
+  it('应该处理带有额外字符的版本字符串', () => {
+    vi.stubGlobal('process', { version: 'v16.12.1-nightly' });
+    expect(checkNodeVersion(16)).toBe(true);
   });
 });
