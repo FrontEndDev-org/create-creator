@@ -12,10 +12,10 @@ Create a creator.
 
 ## Features
 
-- 🗝 Simple and easy to use, concise design
+- 🗝 Simple and easy to use, clean design
 - 🛠️ Template-based project generation
 - ⚙️ Interactive CLI configuration
-- 📦 Supports multiple templates
+- 📦 Multiple template support
 - 🧩 EJS template rendering
 
 ## Installation & Usage
@@ -24,7 +24,7 @@ Create a creator.
 npm create creator my-creator
 
 Need to install the following packages:
-create-creator@1.0.0
+create-creator@2.0.0
 Ok to proceed? (y)
 
 > npx
@@ -85,7 +85,7 @@ my-creator
 
 ## Examples
 
-### Extending Custom Data
+### Extend Custom Data
 
 ```ts
 // src/index.ts
@@ -121,10 +121,12 @@ export async function createCLI() {
     // ... other options
   });
 
+  // Don't generate eslint related files when eslint is not selected
   creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
+  // Don't generate biome related files when biome is not selected
   creator.writeIntercept(['biome*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
@@ -133,7 +135,7 @@ export async function createCLI() {
 }
 ```
 
-### Logging File Writes
+### Logging
 
 ```ts
 // src/index.ts
@@ -145,21 +147,33 @@ export async function createCLI() {
     }
   });
 
-  creator.on('written', (meta, data) => {
-    console.log(`Writing file: ${meta.targetPath}`);
+  creator.on('before', ({prompts}) => {
+    prompts.log.info('Print some banner information');
+  });
+
+  creator.on('start', ({prompts}) => {
+    prompts.log.info('Starting new project creation');
+  });
+
+  creator.on('written', (meta, data, override) => {
+    data.ctx.prompts.log.info(`File written: ${meta.targetPath}`);
+  });
+
+  creator.on('end', ({prompts}, meta) => {
+    prompts.log.info('Creation successful');
   });
 
   await creator.create();
 }
 ```
 
-### Custom CLI Selection
+### Custom CLI Interactions
 ```ts
 // src/index.ts
 import { promptsSafe } from 'create-creator';
 
 export async function createCLI() {
-  return createCreator({
+  const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
       const tabSize = await promptsSafe(prompts.select({
@@ -186,7 +200,7 @@ export async function createCLI() {
 ```
 
 ### Dot Files
-Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with _ to handle them correctly in templates.
+Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix them with _ in the template directory for proper handling.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -195,7 +209,7 @@ templates/default/
 ```
 
 ### Underscore Files
-In `templates`, to create dot files you need to use `_*` prefix, so to create files that actually start with underscore (`_*`), you need to use double underscore prefix (`__*`).
+In `templates`, creating dot files requires _* prefix, so creating underscore (_*) files requires double underscore prefix (__*).
 ```bash
 templates/default/
 ├── __gitignore -> _gitignore
@@ -206,7 +220,7 @@ templates/default/
 ## API
 
 ### `createCreator<T>(options: CreatorOptions<T>): Promise<void>`
-Create a creator.
+Create a new project scaffolding.
 
 ### `CreatorOptions<T>`
 ```ts
@@ -335,8 +349,9 @@ export type OverrideFileMeta = {
  * @template T - Type of custom data to extend with
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  before: [context: CreatorContext];
   start: [context: CreatorContext];
-  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
   end: [context: CreatorContext];
 }> {
   /**
@@ -424,6 +439,51 @@ export type CreatorContext = {
 };
 ```
 
+### `WriteMeta`
+```ts
+/**
+ * Metadata about files being processed
+ */
+export type WriteMeta = {
+  /**
+   * Whether file uses EJS templating
+   */
+  isEjsFile: boolean;
+  /**
+   * Whether file uses underscore prefix
+   */
+  isUnderscoreFile: boolean;
+  /**
+   * Whether file uses dot prefix
+   */
+  isDotFile: boolean;
+  /**
+   * Full path to source file
+   */
+  sourceFile: string;
+  /**
+   * Relative path to source file
+   */
+  sourcePath: string;
+  /**
+   * Root directory of source files
+   */
+  sourceRoot: string;
+  /**
+   * Full path to target file
+   */
+  targetFile: string;
+  /**
+   * Relative path to target file
+   */
+  targetPath: string;
+  /**
+   * Root directory of target files
+   */
+  targetRoot: string;
+};
+```
+
 ### `CreatorData<T>`
 ```ts
 /**
@@ -436,13 +496,13 @@ export type CreatorData<T> = {
 ```
 
 ### `selectNodeVersion(versions?: number[]): Promise<number>`
-Interactive CLI selection for Node.js version.
+Interactive CLI selection for node version.
 
 ### `selectNpmRegistry(registries?: string[]): Promise<string>`
 Interactive CLI selection for npm registry.
 
 ### `selectCodeLinter(linters?: string[]): Promise<string>`
-Interactive CLI selection for code linter/formatter.
+Interactive CLI selection for code linter.
 
 ### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
 Interactive CLI selection for file write mode when directory is not empty.
