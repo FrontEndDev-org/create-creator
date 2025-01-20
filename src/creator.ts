@@ -6,10 +6,18 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
+import { tryFlatten } from 'try-flatten';
 import { MiddleWare, type MiddleWareCallback } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { selectWriteMode } from './prompts';
-import { execCommand, isDirectory, normalizePath } from './utils';
+import {
+  type CheckPkgUpdate,
+  checkNodeVersion,
+  checkPkgVersion,
+  execCommand,
+  isDirectory,
+  normalizePath,
+} from './utils';
 
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
@@ -183,6 +191,14 @@ export type CreatorOptions<T> = {
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
+  /**
+   * Check for updates
+   */
+  checkUpdate?: CheckPkgUpdate & { version: string };
+  /**
+   * Check Node.js version
+   */
+  checkNodeVersion?: number;
 };
 
 const UNDERSCORE_FILE_PREFIX = '__';
@@ -251,6 +267,33 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   ) {
     this.#writeMW.match(paths, interceptor);
     return this;
+  }
+
+  async #prepare() {
+    const { context, options } = this;
+
+    if (options.checkNodeVersion) {
+      const adapted = checkNodeVersion(options.checkNodeVersion);
+
+      if (adapted) {
+        prompts.cancel(`Your Node.js version is old, please upgrade to ${options.checkNodeVersion} or newer.`);
+        process.exit(1);
+      }
+    }
+
+    if (options.checkUpdate) {
+      const { version, name, distTag, registry } = options.checkUpdate;
+      const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
+
+      if (err) {
+        prompts.cancel(`Failed to check for updates: ${err.message}`);
+        process.exit(1);
+      } else if (version !== newVersion) {
+        const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
+        prompts.cancel(`New version ${newVersion} is available, please use \`${command}\` instead.`);
+        process.exit(1);
+      }
+    }
   }
 
   async #check() {
@@ -423,6 +466,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     context.templateRoot = normalizePath(path.join(context.templatesRoot, context.templateName));
 
     await this.emit('start', context);
+    await this.#prepare();
     await this.#check();
     await this.#extend();
     await this.#generate();
