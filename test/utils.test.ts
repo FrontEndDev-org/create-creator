@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
+import { checkPkgVersion, execCommand, isDirectory, isFile, normalizePath } from '../src/utils';
 import { testRoot } from './helpers';
 
 let tempDir: string;
@@ -98,5 +98,39 @@ describe('execCommand', () => {
     });
     expect(error).toBeNull();
     expect(result.stdout.trim()).toBe('test-value');
+  });
+});
+
+describe('checkPkgVersion', () => {
+  it('should return package version from npm registry', async () => {
+    const mockResponse = { version: '1.2.3' };
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(mockResponse),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const version = await checkPkgVersion({
+      name: 'test-package',
+      distTag: 'xxx',
+      registry: 'https://registry.npmjs.org',
+    });
+
+    expect(version).toBe('1.2.3');
+    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/xxx?t=1234567890');
+  });
+
+  it('should use default distTag and registry when not provided', async () => {
+    const mockResponse = { version: '1.0.0' };
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve(mockResponse),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const version = await checkPkgVersion({
+      name: 'test-package',
+    });
+
+    expect(version).toBe('1.0.0');
+    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest?t=1234567890');
   });
 });

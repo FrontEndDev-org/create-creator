@@ -1,5 +1,6 @@
 import { type ChildProcess, type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
+import path from 'node:path';
 
 export function normalizePath(path: string) {
   return path.replace(/\\/g, '/');
@@ -29,4 +30,33 @@ export async function execCommand(
       }
     });
   });
+}
+
+export type CheckPkgUpdate = {
+  /**
+   * Package name
+   */
+  name: string;
+  /**
+   * Dist tag
+   * @default 'latest'
+   * @see https://docs.npmjs.com/cli/dist-tag
+   */
+  distTag?: string;
+  /**
+   * NPM registry
+   * @default 'https://registry.npmjs.org'
+   */
+  registry?: string;
+};
+
+export async function checkPkgVersion(pkg: CheckPkgUpdate) {
+  const url = new URL(pkg.registry || 'https://registry.npmjs.org');
+  url.pathname = path.join(pkg.name, pkg.distTag || 'latest');
+  url.searchParams.set('t', process.env.TEST ? '1234567890' : Date.now().toString());
+
+  const resp = await fetch(url.toString());
+  const { version } = (await resp.json()) as { version: string };
+
+  return version;
 }
