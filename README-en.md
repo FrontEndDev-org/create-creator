@@ -8,14 +8,14 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![npm version](https://badge.fury.io/js/create-creator.svg)](https://npmjs.com/package/create-creator)
 
-Create a creator.
+A scaffolding generator.
 
 ## Features
 
 - 🗝 Simple and easy to use, clean design
 - 🛠️ Template-based project generation
 - ⚙️ Interactive CLI configuration
-- 📦 Multiple template support
+- 📦 Support for multiple templates
 - 🧩 EJS template rendering
 
 ## Installation & Usage
@@ -112,7 +112,7 @@ Created by: <%= author %>
 Created at: <%= timestamp %>
 ```
 
-### Conditional Template Rendering
+### Conditionally Render Different Template Files
 
 ```ts
 // src/index.ts
@@ -135,7 +135,7 @@ export async function createCLI() {
 }
 ```
 
-### Logging
+### Print Related Logs
 
 ```ts
 // src/index.ts
@@ -148,15 +148,15 @@ export async function createCLI() {
   });
 
   creator.on('before', ({prompts}) => {
-    prompts.log.info('Print some banner information');
+    prompts.log.info('Output some banner information');
   });
 
   creator.on('start', ({prompts}) => {
-    prompts.log.info('Starting new project creation');
+    prompts.log.info('Start creating new project');
   });
 
   creator.on('written', (meta, data, override) => {
-    data.ctx.prompts.log.info(`File written: ${meta.targetPath}`);
+    data.ctx.prompts.log.info(`Write file: ${meta.targetPath}`);
   });
 
   creator.on('end', ({prompts}, meta) => {
@@ -167,7 +167,7 @@ export async function createCLI() {
 }
 ```
 
-### Custom CLI Interactions
+### Custom CLI Selection Interaction
 ```ts
 // src/index.ts
 import { promptsSafe } from 'create-creator';
@@ -200,7 +200,7 @@ export async function createCLI() {
 ```
 
 ### Dot Files
-Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix them with _ in the template directory for proper handling.
+Create dot (`.*`) files in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with `_` to handle them correctly in templates.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -209,7 +209,7 @@ templates/default/
 ```
 
 ### Underscore Files
-In `templates`, creating dot files requires _* prefix, so creating underscore (_*) files requires double underscore prefix (__*).
+In `templates`, creating dot files requires `_*` prefix, so creating underscore (`_*`) files requires double underscore prefix (`__*`).
 ```bash
 templates/default/
 ├── __gitignore -> _gitignore
@@ -242,29 +242,9 @@ export type CreatorOptions<T> = {
    */
   templatesRoot: string;
   /**
-   * Callback before template generation
-   */
-  onStart?: (context: CreatorContext) => unknown | Promise<unknown>;
-  /**
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-  /**
-   * Control which files should be written
-   */
-  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
-  /**
-   * Custom file writing implementation
-   */
-  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after each file is written
-   */
-  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after template generation completes
-   */
-  onEnd?: (context: CreatorContext) => unknown | Promise<unknown>;
 };
 ```
 
@@ -377,6 +357,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   create(): Promise<void>;
 }
 ```
+
 
 ### `CreatorContext`
 ```ts
@@ -496,16 +477,16 @@ export type CreatorData<T> = {
 ```
 
 ### `selectNodeVersion(versions?: number[]): Promise<number>`
-Interactive CLI selection for node version.
+CLI interaction to select node version.
 
 ### `selectNpmRegistry(registries?: string[]): Promise<string>`
-Interactive CLI selection for npm registry.
+CLI interaction to select npm registry.
 
 ### `selectCodeLinter(linters?: string[]): Promise<string>`
-Interactive CLI selection for code linter.
+CLI interaction to select code linter.
 
 ### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
-Interactive CLI selection for file write mode when directory is not empty.
+CLI interaction to select file write mode when directory is not empty.
 
 ## License
 

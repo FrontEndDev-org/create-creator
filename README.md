@@ -242,29 +242,9 @@ export type CreatorOptions<T> = {
    */
   templatesRoot: string;
   /**
-   * Callback before template generation
-   */
-  onStart?: (context: CreatorContext) => unknown | Promise<unknown>;
-  /**
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-  /**
-   * Control which files should be written
-   */
-  canWrite?: (meta: FileMeta, data: CreatorData<T>) => boolean | Promise<boolean>;
-  /**
-   * Custom file writing implementation
-   */
-  doWrite?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after each file is written
-   */
-  onWritten?: (meta: FileMeta, data: CreatorData<T>) => unknown | Promise<unknown>;
-  /**
-   * Callback after template generation completes
-   */
-  onEnd?: (context: CreatorContext) => unknown | Promise<unknown>;
 };
 ```
 
