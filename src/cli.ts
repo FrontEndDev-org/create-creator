@@ -6,7 +6,7 @@ import { pkgDescription, pkgName, pkgVersion } from './const';
 import { colors, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 import { execCommand, isDirectory } from './utils';
 
-export async function createCLI() {
+export async function createCli() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
@@ -55,11 +55,11 @@ export async function createCLI() {
     targetFileName: meta.sourceFileName,
   }));
 
-  creator.writeIntercept(['eslint*', 'prettier*', '_prettier*'], (meta, data) => ({
+  creator.writeIntercept(['**/eslint*', '**/prettier*', '**/_prettier*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
-  creator.writeIntercept(['biome.*'], (meta, data) => ({
+  creator.writeIntercept(['**/biome.*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
 

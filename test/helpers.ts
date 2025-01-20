@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path/posix';
 import process from 'node:process';
+import fse from 'fs-extra';
 
 export const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'test-root-'));
 
@@ -16,10 +17,20 @@ export async function runTest(
     return await test({ cwd });
   } finally {
     try {
-      fs.rmSync(cwd, { recursive: true });
       await after?.({ cwd });
+      fse.removeSync(cwd);
     } catch (cause) {
       //
     }
   }
+}
+
+export async function expectExit(promise: Promise<unknown>, code = 0) {
+  const message = `process.exit=${code};`;
+  const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+    throw new Error(message);
+  });
+  await expect(promise).rejects.toThrow(message);
+  expect(mockExit).toHaveBeenCalledWith(code);
+  mockExit.mockRestore();
 }

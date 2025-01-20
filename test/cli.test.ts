@@ -2,10 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path/posix';
 import process from 'node:process';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
-import { createCLI } from '../src';
+import { createCli } from '../src';
 import * as prompts from '../src/prompts.ts';
 import { isDirectory, isFile } from '../src/utils.ts';
-import { runTest } from './helpers.ts';
+import { expectExit, runTest } from './helpers.ts';
 
 const cwd = process.cwd();
 const argv = process.argv;
@@ -26,15 +26,15 @@ afterAll(() => {
 
 it('创建新脚手架 + eslint', async () => {
   await runTest(async ({ cwd }) => {
+    const projectName = Math.random().toString();
     const toAbs = (p: string) => path.join(cwd, projectName, p);
     const readFile = (p: string) => fs.readFileSync(toAbs(p), 'utf-8');
-    const projectName = Math.random().toString();
 
     process.chdir(cwd);
     process.argv = ['', '', projectName];
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('eslint');
 
-    await createCLI();
+    await expectExit(createCli());
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();
@@ -58,7 +58,7 @@ it('创建新脚手架 + biome', async () => {
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('biome');
     process.argv = ['', '', projectName];
 
-    await createCLI();
+    await expectExit(createCli());
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();

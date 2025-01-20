@@ -1,7 +1,7 @@
 export { pkgName, pkgVersion } from './const';
 export { Creator } from './Creator';
 export type * from './Creator';
-export { createCLI } from './cli';
+export { createCli } from './cli';
 export {
   colors,
   prompts,

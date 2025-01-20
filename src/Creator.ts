@@ -254,7 +254,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       }
     }
 
-    if (options.checkUpdate) {
+    if (options.checkUpdate && !process.env.TEST) {
       const { version, name, distTag = 'latest', registry } = options.checkUpdate;
       const spinner = prompts.spinner();
 

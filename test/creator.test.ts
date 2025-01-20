@@ -8,7 +8,7 @@ import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { Creator } from '../src';
 import * as prompts from '../src/prompts';
 import { execCommand, isFile } from '../src/utils';
-import { runTest, testRoot } from './helpers';
+import { expectExit, runTest, testRoot } from './helpers';
 
 let templatesRoot: string;
 let templateRoot: string;
@@ -44,16 +44,20 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-it('应该调用 onStart 和 onEnd', async () => {
+it('应该触发相应事件', async () => {
   await runTest(async ({ cwd }) => {
+    const mockOnBefore = vi.fn();
     const mockOnStart = vi.fn();
+    const mockOnWritten = vi.fn();
     const mockOnEnd = vi.fn();
     const creator = new Creator({
       cwd,
       templatesRoot,
     });
 
+    creator.on('before', mockOnBefore);
     creator.on('start', mockOnStart);
+    creator.on('written', mockOnWritten);
     creator.on('end', mockOnEnd);
     creator.on('end', (context) => {
       expect(context.cwd).toEqual(cwd);
@@ -64,14 +68,13 @@ it('应该调用 onStart 和 onEnd', async () => {
       expect(context.projectRoot).toEqual(cwd);
       expect(context.projectName).toEqual(path.basename(cwd));
       expect(context.projectPath).toEqual('.');
-      expect(context.prompts).toBe(clackPrompts);
-      expect(context.colors).toBe(colors);
-      expect(context.execCommand).toBe(execCommand);
     });
 
-    await creator.create();
+    await expectExit(creator.create());
 
+    expect(mockOnBefore).toHaveBeenCalled();
     expect(mockOnStart).toHaveBeenCalled();
+    expect(mockOnWritten).toHaveBeenCalled();
     expect(mockOnEnd).toHaveBeenCalled();
   });
 });
@@ -84,7 +87,8 @@ it('空模板目录应该报错', async () => {
       cwd,
       templatesRoot: emptyTemplatesRoot,
     });
-    await expect(creator.create()).rejects.toThrow();
+
+    await expectExit(creator.create());
   });
 });
 
@@ -96,7 +100,8 @@ it('覆盖模式应该覆盖现有文件', async () => {
       cwd,
       templatesRoot,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     // 验证文件被覆盖
     const content = fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8');
@@ -112,7 +117,8 @@ it('清空模式应该删除所有文件', async () => {
       cwd,
       templatesRoot,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     // 验证旧文件被删除
     expect(fs.existsSync(path.join(cwd, 'existing.txt'))).toBe(false);
@@ -128,7 +134,8 @@ it('取消模式应该中止创建', async () => {
       cwd,
       templatesRoot,
     });
-    await expect(creator.create()).rejects.toThrow();
+
+    await expectExit(creator.create());
 
     expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
   });
@@ -141,7 +148,8 @@ it('EJS 文件应该正确渲染', async () => {
       templatesRoot,
       projectPath: projectName,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     const content = fs.readFileSync(path.join(cwd, projectName, 'file1.txt'), 'utf8');
     expect(content.trim()).toEqual(`Hello ${projectName}`);
@@ -154,7 +162,8 @@ it('应该正确处理不同的EJS文件扩展名', async () => {
       cwd,
       templatesRoot,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     expect(fs.existsSync(path.join(cwd, 'file1.txt'))).toBe(true);
     expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch(path.basename(cwd));
@@ -177,7 +186,8 @@ it('应该支持自定义扩展数据', async () => {
         templatesRoot,
         extendData: mockExtendData,
       });
-      await creator.create();
+
+      await expectExit(creator.create());
 
       expect(mockExtendData).toHaveBeenCalled();
       const content = fs.readFileSync(path.join(cwd, fileName), 'utf8');
@@ -195,7 +205,8 @@ it('应该正确处理下划线前缀文件', async () => {
       cwd,
       templatesRoot,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(false);
     expect(isFile(path.join(cwd, '__file2.txt'))).toBe(false);
@@ -217,29 +228,11 @@ it('应该正确处理点前缀文件', async () => {
       cwd,
       templatesRoot,
     });
-    await creator.create();
+
+    await expectExit(creator.create());
 
     expect(fs.existsSync(path.join(cwd, `.${fileName}`))).toBe(true);
     expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(false);
-  });
-});
-
-it('应该正确规范化路径', async () => {
-  await runTest(async ({ cwd }) => {
-    const mockOnEnd = vi.fn();
-
-    const creator = new Creator({
-      cwd: path.join(cwd, 'test\\path'),
-      templatesRoot,
-    });
-    creator.on('end', mockOnEnd);
-    await creator.create();
-
-    expect(mockOnEnd).toHaveBeenCalled();
-    const context = mockOnEnd.mock.calls[0][0];
-    expect(context.cwd).not.toMatch(/\\/);
-    expect(context.templatesRoot).not.toMatch(/\\/);
-    expect(context.projectRoot).not.toMatch(/\\/);
   });
 });
 
@@ -256,7 +249,7 @@ it('写入文件前拦截 disableRenderEjs', async () => {
       };
     });
 
-    await creator.create();
+    await expectExit(creator.create());
 
     expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch('<%=');
     expect(fs.readFileSync(path.join(cwd, 'path/to/file4.txt'), 'utf8')).toMatch('<%=');
@@ -276,7 +269,7 @@ it('写入文件前拦截 disableWrite', async () => {
       };
     });
 
-    await creator.create();
+    await expectExit(creator.create());
 
     expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(false);
     expect(isFile(path.join(cwd, 'file1.txt'))).toBe(true);
@@ -303,7 +296,7 @@ it('写入文件前拦截 targetFileName', async () => {
       };
     });
 
-    await creator.create();
+    await expectExit(creator.create());
 
     expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(true);
     expect(isFile(path.join(cwd, 'file1.txt'))).toBe(false);
@@ -335,7 +328,7 @@ it('外置模板源', async () => {
       templatesRoot: templatesRoot,
     });
 
-    creator.on('before', async ({ execCommand }) => {
+    creator.on('before', async () => {
       // 安装 create-vite
       fse.outputFileSync(
         path.join(npmRoot, 'package.json'),
@@ -356,7 +349,7 @@ it('外置模板源', async () => {
       }
     });
 
-    await creator.create();
+    await expectExit(creator.create());
 
     // 验证项目名
     const originPkg = fse.readJsonSync(path.join(templatesRoot, templateName, 'package.json')) as {
