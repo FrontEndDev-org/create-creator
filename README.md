@@ -349,8 +349,9 @@ export type OverrideFileMeta = {
  * @template T - Type of custom data to extend with
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
+  before: [context: CreatorContext];
   start: [context: CreatorContext];
-  write: [fileMeta: FileMeta, data: CreatorData<T>, overrideFileMeta?: OverrideFileMeta];
+  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
   end: [context: CreatorContext];
 }> {
   /**
@@ -376,6 +377,8 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   create(): Promise<void>;
 }
 ```
+
+
 ### `CreatorContext`
 ```ts
 /**
