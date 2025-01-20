@@ -218,9 +218,11 @@ templates/default/
 ```
 
 ## API
-
-### `createCreator<T>(options: CreatorOptions<T>): Promise<void>`
-创建一个新项目的脚手架。
+```ts
+const creator = new Creator<T>(CreatorOptions<T>)
+// ...
+await creator.create();
+```
 
 ### `CreatorOptions<T>`
 ```ts
@@ -245,6 +247,14 @@ export type CreatorOptions<T> = {
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
+  /**
+   * Check for updates
+   */
+  checkUpdate?: CheckPkgUpdate & { version: string };
+  /**
+   * Check Node.js version
+   */
+  checkNodeVersion?: number;
 };
 ```
 
@@ -322,43 +332,6 @@ export type OverrideFileMeta = {
 };
 ```
 
-### `Creator<T>`
-```ts
-/**
- * Main class for handling project creation
- * @template T - Type of custom data to extend with
- */
-export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
-  before: [context: CreatorContext];
-  start: [context: CreatorContext];
-  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
-  end: [context: CreatorContext];
-}> {
-  /**
-   * Create a new Creator instance
-   * @param options - Configuration options
-   */
-  constructor(options: CreatorOptions<T>);
-
-  /**
-   * Add file write interceptors
-   * @param paths - Glob patterns to match files
-   * @param interceptor - Interceptor callback function
-   * @returns The Creator instance for chaining
-   */
-  writeIntercept(
-    paths: string | string[],
-    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>
-  ): this;
-
-  /**
-   * Start the project creation process
-   */
-  create(): Promise<void>;
-}
-```
-
-
 ### `CreatorContext`
 ```ts
 /**
@@ -420,51 +393,6 @@ export type CreatorContext = {
 };
 ```
 
-### `WriteMeta`
-```ts
-/**
- * Metadata about files being processed
- */
-export type WriteMeta = {
-  /**
-   * Whether file uses EJS templating
-   */
-  isEjsFile: boolean;
-  /**
-   * Whether file uses underscore prefix
-   */
-  isUnderscoreFile: boolean;
-  /**
-   * Whether file uses dot prefix
-   */
-  isDotFile: boolean;
-  /**
-   * Full path to source file
-   */
-  sourceFile: string;
-  /**
-   * Relative path to source file
-   */
-  sourcePath: string;
-  /**
-   * Root directory of source files
-   */
-  sourceRoot: string;
-  /**
-   * Full path to target file
-   */
-  targetFile: string;
-  /**
-   * Relative path to target file
-   */
-  targetPath: string;
-  /**
-   * Root directory of target files
-   */
-  targetRoot: string;
-};
-```
-
 ### `CreatorData<T>`
 ```ts
 /**
@@ -476,16 +404,56 @@ export type CreatorData<T> = {
 } & T;
 ```
 
-### `selectNodeVersion(versions?: number[]): Promise<number>`
+
+### 事件
+#### `creator.on('before', (context: CreatorContext) => unknown)`
+在创建前触发
+
+#### `creator.on('start', (context: CreatorContext) => unknown)`
+在创建开始触发
+
+#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
+在文件写入后触发
+
+#### `creator.on('end', (context: CreatorContext) => unknown)`
+在创建结束触发
+
+### 拦截器
+#### `writeIntercept(paths: string | string[], interceptor: WriteInterceptor)`
+拦截文件写入。例如：
+
+- 如果配置了 `ssr`，则生成 `src/client.ts` 和 `src/server.ts`
+- 否则
+  - 如果源文件是 `client.ts` 则重命名为 `index.ts`
+  - 如果源文件是 `server.ts` 则不需要生成
+
+```ts
+creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
+  if (data.ssr) return {};
+
+  return fileMeta.sourceFileName === 'client.ts'
+  // client.ts -> index.ts
+  ? {
+    targetFileName: 'index.ts'
+  }
+  // 不需要写入 server.ts
+  : {
+    disableWrite: true
+  }
+})
+```
+
+### 命令行交互
+#### `selectNodeVersion(versions?: number[]): Promise<number>`
 命令行交互选择 node 版本。
 
-### `selectNpmRegistry(registries?: string[]): Promise<string>`
+#### `selectNpmRegistry(registries?: string[]): Promise<string>`
 命令行交互选择 npm 仓库地址。
 
-### `selectCodeLinter(linters?: string[]): Promise<string>`
+#### `selectCodeLinter(linters?: string[]): Promise<string>`
 命令行交互选择代码格式化工具。
 
-### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
+#### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
 命令行交互选择当目录不为空时文件的写入模式。
 
 ## License

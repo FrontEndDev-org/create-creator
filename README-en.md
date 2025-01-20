@@ -60,22 +60,22 @@ my-creator
 ├── .nvmrc
 ├── README.md
 ├── bin
-│   └── index.cjs
+│   └── index.cjs
 ├── biome.jsonc
 ├── commitlint.config.mjs
 ├── lefthook.yml
 ├── package.json
 ├── src
-│   ├── const.ts
-│   ├── dts
-│   │   ├── global.d.ts
-│   │   └── types.d.ts
-│   └── index.ts
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
 ├── templates
-│   └── default
-│       └── README.md.ejs
+│   └── default
+│       └── README.md.ejs
 ├── test
-│   └── sample.test.ts
+│   └── sample.test.ts
 ├── tsconfig.json
 └── vite.config.mts
 ```
@@ -112,7 +112,7 @@ Created by: <%= author %>
 Created at: <%= timestamp %>
 ```
 
-### Conditionally Render Different Template Files
+### Conditional Template Rendering
 
 ```ts
 // src/index.ts
@@ -121,12 +121,12 @@ export async function createCLI() {
     // ... other options
   });
 
-  // Don't generate eslint related files when eslint is not selected
+  // Skip eslint files if eslint is not selected
   creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
-  // Don't generate biome related files when biome is not selected
+  // Skip biome files if biome is not selected
   creator.writeIntercept(['biome*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
@@ -135,7 +135,7 @@ export async function createCLI() {
 }
 ```
 
-### Print Related Logs
+### Logging
 
 ```ts
 // src/index.ts
@@ -148,15 +148,15 @@ export async function createCLI() {
   });
 
   creator.on('before', ({prompts}) => {
-    prompts.log.info('Output some banner information');
+    prompts.log.info('Display some banner information');
   });
 
   creator.on('start', ({prompts}) => {
-    prompts.log.info('Start creating new project');
+    prompts.log.info('Starting new project creation');
   });
 
   creator.on('written', (meta, data, override) => {
-    data.ctx.prompts.log.info(`Write file: ${meta.targetPath}`);
+    data.ctx.prompts.log.info(`File written: ${meta.targetPath}`);
   });
 
   creator.on('end', ({prompts}, meta) => {
@@ -167,7 +167,7 @@ export async function createCLI() {
 }
 ```
 
-### Custom CLI Selection Interaction
+### Custom CLI Interactions
 ```ts
 // src/index.ts
 import { promptsSafe } from 'create-creator';
@@ -200,7 +200,7 @@ export async function createCLI() {
 ```
 
 ### Dot Files
-Create dot (`.*`) files in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with `_` to handle them correctly in templates.
+To create dot files (e.g., .gitignore, .npmrc) in templates/default directory, prefix the filename with `_` since dot files are hidden in file systems.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -209,7 +209,7 @@ templates/default/
 ```
 
 ### Underscore Files
-In `templates`, creating dot files requires `_*` prefix, so creating underscore (`_*`) files requires double underscore prefix (`__*`).
+To create underscore-prefixed files in `templates`, use double underscores (`__*`) since single underscore is reserved for dot files.
 ```bash
 templates/default/
 ├── __gitignore -> _gitignore
@@ -218,9 +218,11 @@ templates/default/
 ```
 
 ## API
-
-### `createCreator<T>(options: CreatorOptions<T>): Promise<void>`
-Create a new project scaffolding.
+```ts
+const creator = new Creator<T>(CreatorOptions<T>)
+// ...
+await creator.create();
+```
 
 ### `CreatorOptions<T>`
 ```ts
@@ -245,6 +247,14 @@ export type CreatorOptions<T> = {
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
+  /**
+   * Check for updates
+   */
+  checkUpdate?: CheckPkgUpdate & { version: string };
+  /**
+   * Check Node.js version
+   */
+  checkNodeVersion?: number;
 };
 ```
 
@@ -322,43 +332,6 @@ export type OverrideFileMeta = {
 };
 ```
 
-### `Creator<T>`
-```ts
-/**
- * Main class for handling project creation
- * @template T - Type of custom data to extend with
- */
-export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
-  before: [context: CreatorContext];
-  start: [context: CreatorContext];
-  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
-  end: [context: CreatorContext];
-}> {
-  /**
-   * Create a new Creator instance
-   * @param options - Configuration options
-   */
-  constructor(options: CreatorOptions<T>);
-
-  /**
-   * Add file write interceptors
-   * @param paths - Glob patterns to match files
-   * @param interceptor - Interceptor callback function
-   * @returns The Creator instance for chaining
-   */
-  writeIntercept(
-    paths: string | string[],
-    interceptor: MiddleWareCallback<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>
-  ): this;
-
-  /**
-   * Start the project creation process
-   */
-  create(): Promise<void>;
-}
-```
-
-
 ### `CreatorContext`
 ```ts
 /**
@@ -420,51 +393,6 @@ export type CreatorContext = {
 };
 ```
 
-### `WriteMeta`
-```ts
-/**
- * Metadata about files being processed
- */
-export type WriteMeta = {
-  /**
-   * Whether file uses EJS templating
-   */
-  isEjsFile: boolean;
-  /**
-   * Whether file uses underscore prefix
-   */
-  isUnderscoreFile: boolean;
-  /**
-   * Whether file uses dot prefix
-   */
-  isDotFile: boolean;
-  /**
-   * Full path to source file
-   */
-  sourceFile: string;
-  /**
-   * Relative path to source file
-   */
-  sourcePath: string;
-  /**
-   * Root directory of source files
-   */
-  sourceRoot: string;
-  /**
-   * Full path to target file
-   */
-  targetFile: string;
-  /**
-   * Relative path to target file
-   */
-  targetPath: string;
-  /**
-   * Root directory of target files
-   */
-  targetRoot: string;
-};
-```
-
 ### `CreatorData<T>`
 ```ts
 /**
@@ -476,16 +404,55 @@ export type CreatorData<T> = {
 } & T;
 ```
 
-### `selectNodeVersion(versions?: number[]): Promise<number>`
-CLI interaction to select node version.
+### Events
+#### `creator.on('before', (context: CreatorContext) => unknown)`
+Triggered before creation
 
-### `selectNpmRegistry(registries?: string[]): Promise<string>`
+#### `creator.on('start', (context: CreatorContext) => unknown)`
+Triggered when creation starts
+
+#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
+Triggered after file is written
+
+#### `creator.on('end', (context: CreatorContext) => unknown)`
+Triggered when creation completes
+
+### Interceptors
+#### `writeIntercept(paths: string | string[], interceptor: WriteInterceptor)`
+Intercept file writing. Example:
+
+- If `ssr` is configured, generate `src/client.ts` and `src/server.ts`
+- Otherwise
+  - If source file is `client.ts`, rename to `index.ts`
+  - If source file is `server.ts`, skip generation
+
+```ts
+creator.writeIntercept(['src/client.ts', 'src/server.ts'], (fileMeta, data) => {
+  if (data.ssr) return {};
+
+  return fileMeta.sourceFileName === 'client.ts'
+  // client.ts -> index.ts
+  ? {
+    targetFileName: 'index.ts'
+  }
+  // skip server.ts
+  : {
+    disableWrite: true
+  }
+})
+```
+
+### CLI Interactions
+#### `selectNodeVersion(versions?: number[]): Promise<number>`
+CLI interaction to select Node.js version.
+
+#### `selectNpmRegistry(registries?: string[]): Promise<string>`
 CLI interaction to select npm registry.
 
-### `selectCodeLinter(linters?: string[]): Promise<string>`
+#### `selectCodeLinter(linters?: string[]): Promise<string>`
 CLI interaction to select code linter.
 
-### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
+#### `selectWriteMode(cwd: string, ignoreNames?: string[]): Promise<WriteMode>`
 CLI interaction to select file write mode when directory is not empty.
 
 ## License
