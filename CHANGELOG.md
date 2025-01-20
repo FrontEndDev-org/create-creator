@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0 (2025-01-20)
+
+
+### Features
+
+* **core:** 实现类型安全的事件管理 ([078a476](https://github.com/FrontEndDev-org/create-creator/commit/078a476961e27ad50bf37f215b160ce1264aa405))
+* **core:** 重构 Creator 类并添加中间件支持 ([36d52e3](https://github.com/FrontEndDev-org/create-creator/commit/36d52e31e9cd8cd4e439acf8082ef1d3c555e8ac))
+* **creator:** 在 CreatorContext 中添加 execCommand 工具函数 ([d78227f](https://github.com/FrontEndDev-org/create-creator/commit/d78227fab40f91f052fadbe74f70781b1845b40f))
+* **creator:** 重构文件写入流程并添加元数据支持 ([0a100ef](https://github.com/FrontEndDev-org/create-creator/commit/0a100efc2b7366573a1ce9f1af5a84b06e4c2c1d))
+* **MiddleWare:** 实现模式匹配功能 ([3db6e39](https://github.com/FrontEndDev-org/create-creator/commit/3db6e39fa66254bb49f08c1d591b94111cf3536a))
+* 实现中间件并添加相关测试 ([ef4da71](https://github.com/FrontEndDev-org/create-creator/commit/ef4da711d2064d67dc537faeab8fcee1ad8c7875))
+* 更新 2.0 模板 ([ed44d9b](https://github.com/FrontEndDev-org/create-creator/commit/ed44d9b997f9559a62ac535508b490c0d19ff8a9))
+* 更新模板中的 Prettier 配置 ([cb6c46d](https://github.com/FrontEndDev-org/create-creator/commit/cb6c46df6ff0f20d877de32c38b794ef02a64e4e))
+
+
+### Performance Improvements
+
+* **MiddleWare:** 优化 MiddleWare 类中的钩子调用方式 ([8d166dc](https://github.com/FrontEndDev-org/create-creator/commit/8d166dce4f0bc916dc6b1ff3cb8ec3b01e804cbe))
+
 ## 1.0.0 (2025-01-16)
 
 
