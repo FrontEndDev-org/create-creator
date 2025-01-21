@@ -51,3 +51,23 @@ it('should re-export all CreatorError exports', () => {
     expect(index[key as keyof typeof index]).toBe(value);
   }
 });
+
+it('should have correct type for CreatorOptions', () => {
+  type IndexCreatorOptions = import('../src/index').CreatorOptions<unknown>;
+  expectTypeOf<IndexCreatorOptions>().toMatchTypeOf<creatorModule.CreatorOptions<unknown>>();
+});
+
+it('should have correct type for CreatorContext', () => {
+  type IndexCreatorContext = import('../src/index').CreatorContext;
+  expectTypeOf<IndexCreatorContext>().toMatchTypeOf<creatorModule.CreatorContext>();
+});
+
+it('should have correct type for FileMeta', () => {
+  type IndexFileMeta = import('../src/index').FileMeta;
+  expectTypeOf<IndexFileMeta>().toMatchTypeOf<creatorModule.FileMeta>();
+});
+
+it('should have correct type for CreatorData', () => {
+  type IndexCreatorData = import('../src/index').CreatorData<unknown>;
+  expectTypeOf<IndexCreatorData>().toMatchTypeOf<creatorModule.CreatorData<unknown>>();
+});

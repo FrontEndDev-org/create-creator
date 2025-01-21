@@ -1,13 +1,10 @@
-import path from 'node:path/posix';
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
-import type { WriteMode } from './Creator';
 import { CreatorError } from './CreatorError';
-import { execCommand, isDirectory } from './utils';
+import type { WriteMode } from './types';
+import { execCommand } from './utils';
 
-export type Prompts = typeof prompts;
-export type Colors = typeof colors;
 export { colors, prompts };
 
 export async function promptsSafe<T>(promise: Promise<T | symbol>) {

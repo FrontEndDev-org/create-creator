@@ -1,6 +1,7 @@
 import { type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path/posix';
+import type { CheckPkgUpdate } from './types';
 
 export function isDirectory(p: string): boolean {
   return fs.existsSync(p) && fs.statSync(p).isDirectory();
@@ -27,24 +28,6 @@ export async function execCommand(
     });
   });
 }
-
-export type CheckPkgUpdate = {
-  /**
-   * Package name
-   */
-  name: string;
-  /**
-   * Dist tag
-   * @default 'latest'
-   * @see https://docs.npmjs.com/cli/dist-tag
-   */
-  distTag?: string;
-  /**
-   * NPM registry
-   * @default 'https://registry.npmjs.org'
-   */
-  registry?: string;
-};
 
 export async function checkPkgVersion(pkg: CheckPkgUpdate) {
   const url = new URL(pkg.registry || 'https://registry.npmjs.org');
