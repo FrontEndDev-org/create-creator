@@ -149,7 +149,7 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
   spinner.stop('Successfully checked for updates', 0);
 
   if (version !== newVersion) {
-    const command = ['npm', 'create', `${name}@${distTag}`, projectPath].join(' ');
+    const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
     throw new CreatorError(`New version ${newVersion} is available, please use \`${command}\` instead.`);
   }
 }
