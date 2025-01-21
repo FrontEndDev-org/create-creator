@@ -8,8 +8,8 @@
     "lint": "biome check && tsc --noEmit",
     "lint:fix": "biome check --fix --unsafe && tsc --noEmit",
     <%_ } else if (codeLinter === 'eslint') { _%>
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint": "eslint && tsc --noEmit",
+    "lint:fix": "eslint --fix && tsc --noEmit",
     <%_ } _%>
     "build": "NODE_ENV=production vite build",
     "test": "vitest run",
