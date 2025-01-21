@@ -10,7 +10,7 @@ import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
 import { colors, promptSafe, prompts, selectWriteMode } from './prompts';
-import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideFileMeta } from './types';
+import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideWrite } from './types';
 import { checkPkgVersion, isDirectory } from './utils';
 
 /**
@@ -20,7 +20,7 @@ import { checkPkgVersion, isDirectory } from './utils';
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   before: [context: CreatorContext];
   start: [context: CreatorContext];
-  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta];
+  written: [fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideWrite];
   end: [context: CreatorContext];
 }> {
   context: CreatorContext = {
@@ -36,7 +36,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   };
   data: CreatorData<T>;
 
-  #writeMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>;
+  #writeMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], OverrideWrite>;
 
   /**
    * Create a new Creator instance
@@ -67,7 +67,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
   writeIntercept(
     paths: string | string[],
-    interceptor: MiddleWareInterceptor<[meta: FileMeta, data: CreatorData<T>], OverrideFileMeta>,
+    interceptor: MiddleWareInterceptor<[meta: FileMeta, data: CreatorData<T>], OverrideWrite>,
   ) {
     this.#writeMW.match(paths, interceptor);
     return this;

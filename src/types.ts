@@ -87,7 +87,7 @@ export type CreatorBuiltinData = {
  */
 export type CreatorData<T> = CreatorBuiltinData & T;
 
-export type OverrideFileMeta = {
+export type OverrideWrite = {
   /**
    * Whether to disable EJS rendering for EJS files
    */
