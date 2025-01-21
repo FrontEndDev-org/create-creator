@@ -94,7 +94,7 @@ describe('包版本检查', () => {
     });
 
     expect(version).toBe('1.2.3');
-    expect(mockFetch).toHaveBeenCalledWith('https://registry.yyy.org/test-package/xxx?t=1234567890');
+    expect(mockFetch).toHaveBeenCalledWith('https://registry.yyy.org/test-package/xxx');
   });
 
   it('当未提供 distTag 和 registry 时应该使用默认值', async () => {
@@ -109,6 +109,6 @@ describe('包版本检查', () => {
     });
 
     expect(version).toBe('1.0.0');
-    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest?t=1234567890');
+    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest');
   });
 });
