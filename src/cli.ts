@@ -1,10 +1,8 @@
 import path from 'node:path/posix';
 import process from 'node:process';
 import { Creator } from './Creator';
-import { CreatorError } from './CreatorError';
 import { pkgDescription, pkgName, pkgVersion } from './const';
-import { colors, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
-import { execCommand, isDirectory } from './utils';
+import { colors, initGitRepo, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
 
 export async function createCLI() {
   const creator = new Creator({
@@ -34,16 +32,7 @@ export async function createCLI() {
   });
 
   creator.on('end', async ({ projectRoot, projectPath }) => {
-    if (!isDirectory(path.join(projectRoot, '.git'))) {
-      const [err, { stderr, exitCode }] = await execCommand('git init', { cwd: projectRoot });
-
-      if (err) {
-        prompts.log.error(stderr);
-        throw new CreatorError('Failed to initialize git repository');
-      }
-
-      prompts.log.success('Git repository initialized');
-    }
+    await initGitRepo(projectRoot);
 
     prompts.log.success('The project has been created successfully!');
     prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
