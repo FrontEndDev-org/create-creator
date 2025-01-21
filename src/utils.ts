@@ -32,7 +32,6 @@ export async function execCommand(
 export async function checkPkgVersion(pkg: PkgMeta) {
   const url = new URL(pkg.registry || 'https://registry.npmjs.org');
   url.pathname = path.join(pkg.name, pkg.distTag || 'latest');
-  url.searchParams.set('t', process.env.TEST ? '1234567890' : Date.now().toString());
 
   const resp = await fetch(url.toString());
   const { version } = (await resp.json()) as { version: string };
