@@ -1,9 +1,12 @@
-export { pkgName, pkgVersion } from './const';
-export { Creator } from './Creator';
-export type * from './Creator';
 export { createCLI } from './cli';
+export { pkgName, pkgVersion } from './const';
+export type * from './Creator';
+export { Creator } from './Creator';
+export { CreatorError } from './CreatorError';
+export type * from './prompts';
 export {
   colors,
+  initGitRepo,
   prompts,
   promptsSafe,
   selectCodeLinter,
@@ -11,6 +14,4 @@ export {
   selectNpmRegistry,
   selectWriteMode,
 } from './prompts';
-export type * from './prompts';
 export { execCommand } from './utils';
-export { CreatorError } from './CreatorError';
