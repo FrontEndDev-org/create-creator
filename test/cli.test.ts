@@ -34,7 +34,7 @@ it('创建新脚手架 + eslint', async () => {
     process.argv = ['', '', projectName];
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('eslint');
 
-    await expectExit(createCLI());
+    await expectExit(createCLI(), 0);
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();
@@ -58,7 +58,7 @@ it('创建新脚手架 + biome', async () => {
     vi.spyOn(prompts, 'selectCodeLinter').mockResolvedValue('biome');
     process.argv = ['', '', projectName];
 
-    await expectExit(createCLI());
+    await expectExit(createCLI(), 0);
 
     expect(isDirectory(toAbs('.'))).toBeTruthy();
     expect(isDirectory(toAbs('.git'))).toBeTruthy();

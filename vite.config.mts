@@ -2,6 +2,7 @@ import dts from 'vite-plugin-dts';
 import { externalizeDeps } from 'vite-plugin-externalize-deps';
 import { defineConfig } from 'vitest/config';
 
+import type { PluginOption } from 'vite';
 import pkg from './package.json';
 
 /**

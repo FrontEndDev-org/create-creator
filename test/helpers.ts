@@ -25,12 +25,12 @@ export async function runTest(
   }
 }
 
-export async function expectExit(promise: Promise<unknown>, code = 0) {
-  const message = `process.exit=${code};`;
+export async function expectExit(promise: Promise<unknown>, exitCode: number) {
+  const message = `process.exit=${exitCode};`;
   const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
     throw new Error(message);
   });
   await expect(promise).rejects.toThrow(message);
-  expect(mockExit).toHaveBeenCalledWith(code);
+  expect(mockExit).toHaveBeenCalledWith(exitCode);
   mockExit.mockRestore();
 }

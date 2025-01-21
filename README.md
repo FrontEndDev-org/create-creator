@@ -436,9 +436,9 @@ export type CreatorData<T> = {
 } & T;
 ```
 
-### CreatorError 类
+### ExitError 类
 ```ts
-class CreatorError extends Error {
+class ExitError extends Error {
   exitCode: number;
   constructor(message: string);
 }

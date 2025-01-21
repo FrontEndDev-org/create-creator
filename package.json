@@ -4,8 +4,8 @@
   "description": "Create a creator - npm create creator",
   "scripts": {
     "prepare": "lefthook install",
-    "lint": "biome check",
-    "lint:fix": "biome check --fix --unsafe",
+    "lint": "biome check && tsc --noEmit",
+    "lint:fix": "biome check --fix --unsafe && tsc --noEmit",
     "build": "NODE_ENV=production vite build",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"

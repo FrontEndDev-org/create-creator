@@ -70,7 +70,7 @@ it('应该触发相应事件', async () => {
       expect(context.projectPath).toEqual('.');
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(mockOnBefore).toHaveBeenCalled();
     expect(mockOnStart).toHaveBeenCalled();
@@ -88,7 +88,7 @@ it('空模板目录应该报错', async () => {
       templatesRoot: emptyTemplatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 1);
   });
 });
 
@@ -101,7 +101,7 @@ it('覆盖模式应该覆盖现有文件', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     // 验证文件被覆盖
     const content = fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8');
@@ -118,7 +118,7 @@ it('清空模式应该删除所有文件', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     // 验证旧文件被删除
     expect(fs.existsSync(path.join(cwd, 'existing.txt'))).toBe(false);
@@ -135,7 +135,7 @@ it('取消模式应该中止创建', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(fs.existsSync(path.join(cwd, 'test.txt'))).toBe(false);
   });
@@ -149,7 +149,7 @@ it('EJS 文件应该正确渲染', async () => {
       projectPath: projectName,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     const content = fs.readFileSync(path.join(cwd, projectName, 'file1.txt'), 'utf8');
     expect(content.trim()).toEqual(`Hello ${projectName}`);
@@ -163,7 +163,7 @@ it('应该正确处理不同的EJS文件扩展名', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(fs.existsSync(path.join(cwd, 'file1.txt'))).toBe(true);
     expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch(path.basename(cwd));
@@ -187,7 +187,7 @@ it('应该支持自定义扩展数据', async () => {
         extendData: mockExtendData,
       });
 
-      await expectExit(creator.create());
+      await expectExit(creator.create(), 0);
 
       expect(mockExtendData).toHaveBeenCalled();
       const content = fs.readFileSync(path.join(cwd, fileName), 'utf8');
@@ -206,7 +206,7 @@ it('应该正确处理下划线前缀文件', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(false);
     expect(isFile(path.join(cwd, '__file2.txt'))).toBe(false);
@@ -229,7 +229,7 @@ it('应该正确处理点前缀文件', async () => {
       templatesRoot,
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(fs.existsSync(path.join(cwd, `.${fileName}`))).toBe(true);
     expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(false);
@@ -249,7 +249,7 @@ it('写入文件前拦截 disableRenderEjs', async () => {
       };
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(fs.readFileSync(path.join(cwd, 'file1.txt'), 'utf8')).toMatch('<%=');
     expect(fs.readFileSync(path.join(cwd, 'path/to/file4.txt'), 'utf8')).toMatch('<%=');
@@ -269,7 +269,7 @@ it('写入文件前拦截 disableWrite', async () => {
       };
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(false);
     expect(isFile(path.join(cwd, 'file1.txt'))).toBe(true);
@@ -296,7 +296,7 @@ it('写入文件前拦截 targetFileName', async () => {
       };
     });
 
-    await expectExit(creator.create());
+    await expectExit(creator.create(), 0);
 
     expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(true);
     expect(isFile(path.join(cwd, 'file1.txt'))).toBe(false);
@@ -351,7 +351,7 @@ it(
         }
       });
 
-      await expectExit(creator.create());
+      await expectExit(creator.create(), 0);
 
       // 验证项目名
       const originPkg = fse.readJsonSync(path.join(templatesRoot, templateName, 'package.json')) as {

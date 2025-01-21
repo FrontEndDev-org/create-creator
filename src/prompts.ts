@@ -2,7 +2,7 @@ import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
-import { CreatorError } from './CreatorError';
+import { ExitError } from './ExitError';
 import type { PkgMeta, WriteMode } from './types';
 import { checkPkgVersion, execCommand } from './utils';
 
@@ -10,7 +10,7 @@ export { colors, prompts };
 
 export async function promptSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
-  if (prompts.isCancel(r)) throw new CreatorError('Operation cancelled');
+  if (prompts.isCancel(r)) throw new ExitError('Operation cancelled', 0);
   return r;
 }
 
@@ -117,7 +117,7 @@ export async function initGitRepo(cwd: string) {
 
   if (err) {
     spinner.stop('Git repository initialization failed', exitCode);
-    throw new CreatorError(err.message);
+    throw new ExitError(err.message, 1);
   }
 
   spinner.stop('Git repository initialized', exitCode);
@@ -128,7 +128,7 @@ export function checkNodeVersion(requiredVersion = 18) {
   const adapted = currentVersion >= requiredVersion;
 
   if (!adapted) {
-    throw new CreatorError(`Your Node.js version is old, please upgrade to ${requiredVersion} or higher`);
+    throw new ExitError(`Your Node.js version is old, please upgrade to ${requiredVersion} or higher`, 1);
   }
 
   return adapted;
@@ -143,13 +143,13 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
 
   if (err) {
     spinner.stop('Failed to check for updates', 1);
-    throw new CreatorError(`Failed to check for updates: ${err.message}`);
+    throw new ExitError(`Failed to check for updates: ${err.message}`, 1);
   }
 
   spinner.stop('Successfully checked for updates', 0);
 
   if (version !== newVersion) {
     const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
-    throw new CreatorError(`New version ${newVersion} is available, please use \`${command}\` instead.`);
+    throw new ExitError(`New version ${newVersion} is available, please use \`${command}\` instead.`, 1);
   }
 }

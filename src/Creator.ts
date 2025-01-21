@@ -5,7 +5,7 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import { tryFlatten } from 'try-flatten';
-import { CreatorError } from './CreatorError';
+import { ExitError } from './ExitError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
@@ -87,7 +87,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         await fse.emptyDir(context.projectRoot);
         break;
       case 'cancel':
-        throw new CreatorError('Canceled by user', 0);
+        throw new ExitError('Canceled by user', 0);
       default:
         break;
     }
@@ -100,7 +100,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       const externalData = await options.extendData?.call(null, context);
 
       if (externalData !== undefined && BUILTIN_DATA_KEY in externalData) {
-        throw new CreatorError(`Extended data cannot contain the internal key name "${BUILTIN_DATA_KEY}"`);
+        throw new ExitError(`Extended data cannot contain the internal key name "${BUILTIN_DATA_KEY}"`, 1);
       }
 
       this.data = {
@@ -122,8 +122,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify selected template contains files
     if (paths.length === 0) {
-      throw new CreatorError(
+      throw new ExitError(
         `Template "${context.templateName}" is empty - add project files to ${context.templateRoot}`,
+        1,
       );
     }
 
@@ -207,8 +208,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify templates root directory exists and is accessible
     if (isDirectory(context.templatesRoot) === false) {
-      throw new CreatorError(
+      throw new ExitError(
         `Invalid templates directory "${context.templatesRoot}" - create a templates folder containing your project templates`,
+        1,
       );
     }
 
@@ -224,8 +226,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify templates directory contains at least one valid template
     if (templateNames.length === 0) {
-      throw new CreatorError(
+      throw new ExitError(
         `No templates found in "${context.templatesRoot}" - add template folders containing your project files`,
+        1,
       );
     }
 
@@ -259,7 +262,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     prompts.cancel(err.message);
 
-    if (err instanceof CreatorError) {
+    if (err instanceof ExitError) {
       process.exit(err.exitCode);
     } else {
       process.exit(1);
