@@ -1,4 +1,4 @@
-import { type ChildProcess, type ExecOptions, exec } from 'node:child_process';
+import { type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path/posix';
 
@@ -20,9 +20,9 @@ export async function execCommand(
       const stderrStr = stderr.toString();
 
       if (error) {
-        resolve([error, { stderr: stderrStr, stdout: stdoutStr, exitCode: process.exitCode || 0 }]);
+        resolve([error, { stderr: stderrStr, stdout: stdoutStr, exitCode: process.exitCode || 1 }]);
       } else {
-        resolve([error, { stderr: stderrStr, stdout: stdoutStr, exitCode: process.exitCode || 0 }]);
+        resolve([error, { stderr: stderrStr, stdout: stdoutStr, exitCode: process.exitCode || 1 }]);
       }
     });
   });
