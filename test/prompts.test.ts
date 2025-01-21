@@ -3,7 +3,14 @@ import path from 'node:path/posix';
 import * as prompts from '@clack/prompts';
 import * as colors from 'picocolors';
 import { describe, expect, it, vi } from 'vitest';
-import { initGitRepo, selectCodeLinter, selectNodeVersion, selectNpmRegistry, selectWriteMode } from '../src/prompts';
+import {
+  checkNodeVersion,
+  initGitRepo,
+  selectCodeLinter,
+  selectNodeVersion,
+  selectNpmRegistry,
+  selectWriteMode,
+} from '../src/prompts';
 import { runTest } from './helpers';
 
 beforeAll(() => {
@@ -93,5 +100,27 @@ it('成功初始化git仓库', async () => {
     await initGitRepo(cwd);
     expect(spinnerSpy).toHaveBeenCalled();
     expect(fs.existsSync(path.join(cwd, '.git'))).toBe(true);
+  });
+});
+
+describe('Node版本检查', () => {
+  it('当当前版本大于要求版本时应返回 true', () => {
+    vi.stubGlobal('process', { version: 'v18.0.0' });
+    expect(checkNodeVersion(16)).toBe(true);
+  });
+
+  it('当当前版本等于要求版本时应返回 true', () => {
+    vi.stubGlobal('process', { version: 'v16.0.0' });
+    expect(checkNodeVersion(16)).toBe(true);
+  });
+
+  it('当当前版本小于要求版本时应返回 false', () => {
+    vi.stubGlobal('process', { version: 'v14.0.0' });
+    expect(() => checkNodeVersion(16)).toThrowError('old');
+  });
+
+  it('应该处理带有额外字符的版本字符串', () => {
+    vi.stubGlobal('process', { version: 'v16.12.1-nightly' });
+    expect(checkNodeVersion(16)).toBe(true);
   });
 });

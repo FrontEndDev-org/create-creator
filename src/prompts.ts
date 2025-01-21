@@ -121,3 +121,14 @@ export async function initGitRepo(cwd: string) {
 
   spinner.stop('Git repository initialized', exitCode);
 }
+
+export function checkNodeVersion(requiredVersion = 18) {
+  const currentVersion = Number.parseInt(process.version.replace(/^\D/, ''));
+  const adapted = currentVersion >= requiredVersion;
+
+  if (!adapted) {
+    throw new CreatorError(`Your Node.js version is old, please upgrade to ${requiredVersion} or higher`);
+  }
+
+  return adapted;
+}

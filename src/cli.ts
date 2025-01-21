@@ -2,13 +2,20 @@ import path from 'node:path/posix';
 import process from 'node:process';
 import { Creator } from './Creator';
 import { pkgDescription, pkgName, pkgVersion } from './const';
-import { colors, initGitRepo, prompts, selectCodeLinter, selectNodeVersion, selectNpmRegistry } from './prompts';
+import {
+  checkNodeVersion,
+  colors,
+  initGitRepo,
+  prompts,
+  selectCodeLinter,
+  selectNodeVersion,
+  selectNpmRegistry,
+} from './prompts';
 
 export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
-    checkNodeVersion: 18,
     checkUpdate: {
       name: pkgName,
       version: pkgVersion,
@@ -29,6 +36,10 @@ export async function createCLI() {
   creator.on('before', () => {
     prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
     prompts.log.info(pkgDescription);
+  });
+
+  creator.on('start', async ({ projectRoot, projectPath }) => {
+    checkNodeVersion(18);
   });
 
   creator.on('end', async ({ projectRoot, projectPath }) => {

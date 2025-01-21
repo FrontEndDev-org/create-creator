@@ -182,8 +182,4 @@ export type CreatorOptions<T> = {
    * Check for updates
    */
   checkUpdate?: CheckPkgUpdate & { version: string };
-  /**
-   * Check Node.js version
-   */
-  checkNodeVersion?: number;
 };

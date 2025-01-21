@@ -39,8 +39,3 @@ export async function checkPkgVersion(pkg: CheckPkgUpdate) {
 
   return version;
 }
-
-export function checkNodeVersion(version: number) {
-  const nodeVersion = Number.parseInt(process.version.replace(/^\D/, ''));
-  return nodeVersion >= version;
-}

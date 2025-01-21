@@ -11,7 +11,7 @@ import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
 import { colors, prompts, selectWriteMode } from './prompts';
 import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideFileMeta } from './types';
-import { checkNodeVersion, checkPkgVersion, execCommand, isDirectory } from './utils';
+import { checkPkgVersion, isDirectory } from './utils';
 
 /**
  * Main class for handling project creation
@@ -76,27 +76,19 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   async #prepare() {
     const { context, options } = this;
 
-    if (options.checkNodeVersion) {
-      const adapted = checkNodeVersion(options.checkNodeVersion);
-
-      if (!adapted) {
-        throw new CreatorError(`Your Node.js version is old, please upgrade to ${options.checkNodeVersion} or higher`);
-      }
-    }
-
     if (options.checkUpdate && !process.env.TEST) {
       const { version, name, distTag = 'latest', registry } = options.checkUpdate;
       const spinner = prompts.spinner();
 
-      spinner.start('检查版本更新...');
+      spinner.start('Checking for version updates...');
       const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
 
       if (err) {
-        spinner.stop('检查版本更新失败', 1);
+        spinner.stop('Failed to check for updates', 1);
         throw new CreatorError(`Failed to check for updates: ${err.message}`);
       }
 
-      spinner.stop('检查版本更新成功', 0);
+      spinner.stop('Successfully checked for updates', 0);
 
       if (version !== newVersion) {
         const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
