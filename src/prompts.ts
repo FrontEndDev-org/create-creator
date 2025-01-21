@@ -1,9 +1,10 @@
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
+import { tryFlatten } from 'try-flatten';
 import { CreatorError } from './CreatorError';
-import type { WriteMode } from './types';
-import { execCommand } from './utils';
+import type { PkgMeta, WriteMode } from './types';
+import { checkPkgVersion, execCommand } from './utils';
 
 export { colors, prompts };
 
@@ -131,4 +132,24 @@ export function checkNodeVersion(requiredVersion = 18) {
   }
 
   return adapted;
+}
+
+export async function checkUpdate(options: PkgMeta & { version: string; projectPath: string }) {
+  const { version, name, distTag = 'latest', registry, projectPath } = options;
+  const spinner = prompts.spinner();
+
+  spinner.start('Checking for version updates...');
+  const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
+
+  if (err) {
+    spinner.stop('Failed to check for updates', 1);
+    throw new CreatorError(`Failed to check for updates: ${err.message}`);
+  }
+
+  spinner.stop('Successfully checked for updates', 0);
+
+  if (version !== newVersion) {
+    const command = ['npm', 'create', `${name}@${distTag}`, projectPath].join(' ');
+    throw new CreatorError(`New version ${newVersion} is available, please use \`${command}\` instead.`);
+  }
 }

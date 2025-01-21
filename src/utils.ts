@@ -1,7 +1,7 @@
 import { type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path/posix';
-import type { CheckPkgUpdate } from './types';
+import type { PkgMeta } from './types';
 
 export function isDirectory(p: string): boolean {
   return fs.existsSync(p) && fs.statSync(p).isDirectory();
@@ -29,7 +29,7 @@ export async function execCommand(
   });
 }
 
-export async function checkPkgVersion(pkg: CheckPkgUpdate) {
+export async function checkPkgVersion(pkg: PkgMeta) {
   const url = new URL(pkg.registry || 'https://registry.npmjs.org');
   url.pathname = path.join(pkg.name, pkg.distTag || 'latest');
   url.searchParams.set('t', process.env.TEST ? '1234567890' : Date.now().toString());

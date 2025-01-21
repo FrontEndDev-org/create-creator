@@ -4,6 +4,7 @@ import { Creator } from './Creator';
 import { pkgDescription, pkgName, pkgVersion } from './const';
 import {
   checkNodeVersion,
+  checkUpdate,
   colors,
   initGitRepo,
   prompts,
@@ -16,10 +17,6 @@ export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
-    checkUpdate: {
-      name: pkgName,
-      version: pkgVersion,
-    },
     async extendData() {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
@@ -38,8 +35,13 @@ export async function createCLI() {
     prompts.log.info(pkgDescription);
   });
 
-  creator.on('start', async ({ projectRoot, projectPath }) => {
+  creator.on('start', async ({ projectPath }) => {
     checkNodeVersion(18);
+    checkUpdate({
+      name: pkgName,
+      version: pkgVersion,
+      projectPath,
+    });
   });
 
   creator.on('end', async ({ projectRoot, projectPath }) => {

@@ -5,7 +5,7 @@ import type { BUILTIN_DATA_KEY } from './const';
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
 
-export type CheckPkgUpdate = {
+export type PkgMeta = {
   /**
    * Package name
    */
@@ -178,8 +178,4 @@ export type CreatorOptions<T> = {
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-  /**
-   * Check for updates
-   */
-  checkUpdate?: CheckPkgUpdate & { version: string };
 };

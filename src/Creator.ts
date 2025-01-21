@@ -73,30 +73,6 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     return this;
   }
 
-  async #prepare() {
-    const { context, options } = this;
-
-    if (options.checkUpdate && !process.env.TEST) {
-      const { version, name, distTag = 'latest', registry } = options.checkUpdate;
-      const spinner = prompts.spinner();
-
-      spinner.start('Checking for version updates...');
-      const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
-
-      if (err) {
-        spinner.stop('Failed to check for updates', 1);
-        throw new CreatorError(`Failed to check for updates: ${err.message}`);
-      }
-
-      spinner.stop('Successfully checked for updates', 0);
-
-      if (version !== newVersion) {
-        const command = ['npm', 'create', `${name}@${distTag}`, options.projectPath].filter(Boolean).join(' ');
-        throw new CreatorError(`New version ${newVersion} is available, please use \`${command}\` instead.`);
-      }
-    }
-  }
-
   async #check() {
     const { context, options } = this;
 
@@ -268,7 +244,6 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     context.templateRoot = path.join(context.templatesRoot, context.templateName);
 
     await this.emit('start', context);
-    await this.#prepare();
     await this.#check();
     await this.#extend();
     await this.#generate();
