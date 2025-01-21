@@ -3,6 +3,7 @@ import { glob } from 'glob';
 import * as colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
 import { ExitError } from './ExitError';
+import { IGNORE_NAMES } from './const';
 import type { PkgMeta, WriteMode } from './types';
 import { checkPkgVersion, execCommand } from './utils';
 
@@ -57,24 +58,6 @@ export async function selectCodeLinter(linters: string[] = ['eslint', 'biome']) 
     }),
   );
 }
-
-const IGNORE_NAMES = [
-  // # Macos
-  '.DS_Store',
-
-  // # Windows
-  '$RECYCLE.BIN',
-  'Desktop.ini',
-  'ehthumbs.db',
-  'Thumbs.db',
-
-  // # git
-  '.git',
-
-  // # Editor directories and files
-  '.idea',
-  '.vscode',
-];
 
 export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): Promise<WriteMode> {
   const files = glob
