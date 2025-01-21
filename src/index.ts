@@ -11,6 +11,7 @@ export {
   selectNodeVersion,
   selectNpmRegistry,
   selectWriteMode,
+  checkNodeVersion,
 } from './prompts';
 export { execCommand } from './utils';
 export type * from './types';
