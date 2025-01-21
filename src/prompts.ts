@@ -112,8 +112,6 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): 
 }
 
 export async function initGitRepo(cwd: string) {
-  if (isDirectory(path.join(cwd, '.git'))) return;
-
   const spinner = prompts.spinner();
   spinner.start('Initializing Git repository...');
 
