@@ -30,14 +30,14 @@ export async function createCLI() {
     },
   });
 
-  creator.on('before', () => {
+  creator.on('before', async ({ projectPath }) => {
     prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
     prompts.log.info(pkgDescription);
-  });
-
-  creator.on('start', async ({ projectPath }) => {
     checkNodeVersion(18);
-    checkUpdate({
+
+    if (process.env.TEST) return;
+
+    await checkUpdate({
       name: pkgName,
       version: pkgVersion,
       projectPath,
