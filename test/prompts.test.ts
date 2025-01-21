@@ -3,7 +3,7 @@ import path from 'node:path/posix';
 import * as prompts from '@clack/prompts';
 import * as colors from 'picocolors';
 import { describe, expect, it, vi } from 'vitest';
-import { selectCodeLinter, selectNodeVersion, selectNpmRegistry, selectWriteMode } from '../src/prompts';
+import { initGitRepo, selectCodeLinter, selectNodeVersion, selectNpmRegistry, selectWriteMode } from '../src/prompts';
 import { runTest } from './helpers';
 
 beforeAll(() => {
@@ -80,5 +80,18 @@ it('有文件，选择清空', async () => {
     vi.spyOn(prompts, 'select').mockResolvedValue('clean');
     const result = await selectWriteMode(cwd);
     expect(result).toBe('clean');
+  });
+});
+
+it('成功初始化git仓库', async () => {
+  await runTest(async ({ cwd }) => {
+    const spinnerSpy = vi.spyOn(prompts, 'spinner').mockReturnValue({
+      start: vi.fn(),
+      stop: vi.fn(),
+      message: vi.fn(),
+    });
+    await initGitRepo(cwd);
+    expect(spinnerSpy).toHaveBeenCalled();
+    expect(fs.existsSync(path.join(cwd, '.git'))).toBe(true);
   });
 });
