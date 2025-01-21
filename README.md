@@ -34,7 +34,7 @@ Ok to proceed? (y)
 │
 ●  Create a creator - npm create creator
 │
-▲  The project directory is: /Users/yundanran/development/localhost/my-creator
+▲  The project directory is: /path/to/my-creator
 │
 ◇  Select node version
 │  v22.x
