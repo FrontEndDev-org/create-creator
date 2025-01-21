@@ -129,7 +129,7 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
     throw new ExitError(`Failed to check for updates: ${err.message}`, 1);
   }
 
-  spinner.stop('Successfully checked for updates', 0);
+  spinner.stop('Currently using the latest version', 0);
 
   if (version !== newVersion) {
     const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
