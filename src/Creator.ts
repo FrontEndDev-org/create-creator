@@ -9,7 +9,7 @@ import { CreatorError } from './CreatorError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
-import { colors, prompts, promptsSafe, selectWriteMode } from './prompts';
+import { colors, promptSafe, prompts, selectWriteMode } from './prompts';
 import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideFileMeta } from './types';
 import { checkPkgVersion, isDirectory } from './utils';
 
@@ -232,7 +232,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     if (templateNames.length === 1) {
       context.templateName = templateNames[0];
     } else {
-      context.templateName = await promptsSafe(
+      context.templateName = await promptSafe(
         prompts.select({
           message: 'Select a template',
           options: templateNames.map((name) => ({

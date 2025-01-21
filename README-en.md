@@ -201,13 +201,13 @@ export async function createCLI() {
 ### Custom CLI selection interaction
 ```ts
 // src/index.ts
-import { promptsSafe } from 'create-creator';
+import { promptSafe } from 'create-creator';
 
 export async function createCLI() {
   const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
-      const tabSize = await promptsSafe(prompts.select({
+      const tabSize = await promptSafe(prompts.select({
         message: 'Select your preferred tab size',
         choices: [
           {
@@ -501,7 +501,7 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
 /**
  * Safely execute prompts operations
  */
-function promptsSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
+function promptSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
 
 /**
  * Select Node.js version

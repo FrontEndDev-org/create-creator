@@ -201,13 +201,13 @@ export async function createCLI() {
 ### 自定义命令行选择交互
 ```ts
 // src/index.ts
-import { promptsSafe } from 'create-creator';
+import { promptSafe } from 'create-creator';
 
 export async function createCLI() {
   const creator = new Creator({
     // ... other options
     async extendData({ prompts }) {
-      const tabSize = await promptsSafe(prompts.select({
+      const tabSize = await promptSafe(prompts.select({
         message: 'Select your preferred tab size',
         choices: [
           {
@@ -500,7 +500,7 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
 /**
  * 安全执行 prompts 操作
  */
-function promptsSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
+function promptSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
 
 /**
  * 选择 Node.js 版本

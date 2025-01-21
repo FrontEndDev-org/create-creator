@@ -8,14 +8,14 @@ import { checkPkgVersion, execCommand } from './utils';
 
 export { colors, prompts };
 
-export async function promptsSafe<T>(promise: Promise<T | symbol>) {
+export async function promptSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
   if (prompts.isCancel(r)) throw new CreatorError('Operation cancelled');
   return r;
 }
 
 export async function selectNodeVersion(versions: number[] = [22, 20, 18, 16, 14]) {
-  return promptsSafe(
+  return promptSafe(
     prompts.select({
       message: 'Select node version',
       options: versions.map((v) => ({
@@ -38,7 +38,7 @@ export async function selectNpmRegistry(
     },
   ],
 ) {
-  return promptsSafe(
+  return promptSafe(
     prompts.select({
       message: 'Select npm registry',
       options: registries,
@@ -47,7 +47,7 @@ export async function selectNpmRegistry(
 }
 
 export async function selectCodeLinter(linters: string[] = ['eslint', 'biome']) {
-  return promptsSafe(
+  return promptSafe(
     prompts.select({
       message: 'Select code linter',
       options: linters.map((v) => ({
@@ -88,7 +88,7 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): 
     return 'overwrite';
   }
 
-  return promptsSafe(
+  return promptSafe(
     prompts.select({
       message: colors.bold(colors.red('The directory is NOT empty. Pick an action')),
       options: [

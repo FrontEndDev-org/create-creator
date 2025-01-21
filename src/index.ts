@@ -6,7 +6,7 @@ export {
   colors,
   initGitRepo,
   prompts,
-  promptsSafe,
+  promptSafe,
   selectCodeLinter,
   selectNodeVersion,
   selectNpmRegistry,

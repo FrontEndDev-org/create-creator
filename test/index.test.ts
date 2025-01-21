@@ -14,7 +14,7 @@ it('should export Creator and CreatorError', () => {
 it('should export prompts functions', () => {
   expect(index.colors).toBeDefined();
   expect(index.prompts).toBeDefined();
-  expect(index.promptsSafe).toBeDefined();
+  expect(index.promptSafe).toBeDefined();
   expect(index.selectNodeVersion).toBeDefined();
   expect(index.selectNpmRegistry).toBeDefined();
   expect(index.selectCodeLinter).toBeDefined();
