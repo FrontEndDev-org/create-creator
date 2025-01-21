@@ -1,12 +1,14 @@
+import path from 'node:path/posix';
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
 import type { WriteMode } from './Creator';
 import { CreatorError } from './CreatorError';
+import { execCommand, isDirectory } from './utils';
 
 export type Prompts = typeof prompts;
 export type Colors = typeof colors;
-export { prompts, colors };
+export { colors, prompts };
 
 export async function promptsSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
@@ -107,4 +109,20 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): 
       ],
     }),
   );
+}
+
+export async function initGitRepo(cwd: string) {
+  if (isDirectory(path.join(cwd, '.git'))) return;
+
+  const spinner = prompts.spinner();
+  spinner.start('Initializing Git repository...');
+
+  const [err, { stderr, exitCode }] = await execCommand('git init', { cwd });
+
+  if (err) {
+    spinner.stop('Git repository initialization failed', exitCode);
+    throw new CreatorError(err.message);
+  }
+
+  spinner.stop('Git repository initialized', exitCode);
 }
