@@ -82,10 +82,7 @@ my-creator
 
 ### 打开 `src/index.ts` 自定义创建逻辑
 ```ts
-import path from 'node:path/posix';
-import process from 'node:process';
-import { Creator, prompts, colors } from 'create-creator';
-import { pkgDescription, pkgName, pkgVersion } from './const';
+import { Creator } from 'create-creator';
 
 export async function createCLI() {
   const creator = new Creator({
@@ -93,23 +90,12 @@ export async function createCLI() {
     templatesRoot: path.join(__dirname, '../templates'),
   });
 
-  creator.on('before', () => {
-    prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
-    prompts.log.info(pkgDescription);
-  });
-
-  creator.on('end', ({ projectPath }) => {
-    prompts.log.success('The project has been created successfully!');
-    prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
-    prompts.outro('🎉🎉🎉');
-  });
-
   // create 方法不会抛错，不必捕获
   await creator.create();
 }
 ```
 
-### 打开 `src/templates` 编写模板文件
+### 打开 `templates` 编写模板文件
 - templates 是模板根目录
 - templates/default 是一个具体模板目录，可以是任意名称
 - 如果 templates 下有多个目录，则会在创建项目时以供用户选择
@@ -367,12 +353,12 @@ export type FileMeta = {
 };
 ```
 
-### `OverrideFileMeta`
+### `OverrideWrite`
 ```ts
 /**
  * Options to override default file writing behavior
  */
-export type OverrideFileMeta = {
+export type OverrideWrite = {
   /**
    * Whether to disable EJS rendering for EJS files
    */
@@ -453,6 +439,7 @@ export type CreatorData<T> = {
 ### CreatorError 类
 ```ts
 class CreatorError extends Error {
+  exitCode: number;
   constructor(message: string);
 }
 ```
@@ -464,7 +451,7 @@ class CreatorError extends Error {
 #### `creator.on('start', (context: CreatorContext) => unknown)`
 在创建开始触发
 
-#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
+#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideWrite) => unknown)`
 在文件写入后触发
 
 #### `creator.on('end', (context: CreatorContext) => unknown)`
@@ -495,12 +482,27 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
 })
 ```
 
-### 其他工具方法
+### 工具方法
 ```ts
 /**
  * 安全执行 prompts 操作
  */
 function promptSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
+
+/**
+ * 初始化 Git 仓库
+ */
+function initGitRepo(cwd: string): Promise<void>;
+
+/**
+ * 检查 Node.js 版本
+ */
+function checkNodeVersion(version: number): Promise<boolean>;
+
+/**
+ * 检查更新
+ */
+function checkUpdate(pkgName: string, currentVersion: string): Promise<boolean>;
 
 /**
  * 选择 Node.js 版本
@@ -529,11 +531,18 @@ function execCommand(
   command: string,
   options?: ExecOptions
 ): Promise<[Error | null, { stderr: string; stdout: string; exitCode: number }]>;
+
+/**
+ * @see https://www.npmjs.com/package/@clack/prompts
+ */
+export const prompts = Prompts;
+
+/**
+ * @see https://www.npmjs.com/package/picocolors
+ */
+export const colors = Colors;
 ```
 
-## Links
-- [prompts](https://www.npmjs.com/package/@clack/prompts)
-- [colors](https://www.npmjs.com/package/picocolors)
 
 ## License
 

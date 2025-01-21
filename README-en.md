@@ -60,32 +60,29 @@ my-creator
 ├── .nvmrc
 ├── README.md
 ├── bin
-│   └── index.cjs
+│   └── index.cjs
 ├── biome.jsonc
 ├── commitlint.config.mjs
 ├── lefthook.yml
 ├── package.json
 ├── src
-│   ├── const.ts
-│   ├── dts
-│   │   ├── global.d.ts
-│   │   └── types.d.ts
-│   └── index.ts
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
 ├── templates
-│   └── default
-│       └── README.md.ejs
+│   └── default
+│       └── README.md.ejs
 ├── test
-│   └── sample.test.ts
+│   └── sample.test.ts
 ├── tsconfig.json
 └── vite.config.mts
 ```
 
 ### Open `src/index.ts` to customize creation logic
 ```ts
-import path from 'node:path/posix';
-import process from 'node:process';
-import { Creator, prompts, colors } from 'create-creator';
-import { pkgDescription, pkgName, pkgVersion } from './const';
+import { Creator } from 'create-creator';
 
 export async function createCLI() {
   const creator = new Creator({
@@ -93,26 +90,15 @@ export async function createCLI() {
     templatesRoot: path.join(__dirname, '../templates'),
   });
 
-  creator.on('before', () => {
-    prompts.intro(colors.bold(colors.bgCyan(` ${pkgName}@${pkgVersion} `)));
-    prompts.log.info(pkgDescription);
-  });
-
-  creator.on('end', ({ projectPath }) => {
-    prompts.log.success('The project has been created successfully!');
-    prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
-    prompts.outro('🎉🎉🎉');
-  });
-
   // create method won't throw errors, no need to catch
   await creator.create();
 }
 ```
 
-### Open `src/templates` to write template files
+### Open `templates` to write template files
 - templates is the root directory for templates
 - templates/default is a specific template directory, can be any name
-- If there are multiple directories under templates, users can choose during project creation
+- If there are multiple directories under templates, they will be available for user selection during project creation
 
 ## Examples
 
@@ -166,7 +152,7 @@ export async function createCLI() {
 }
 ```
 
-### Logging
+### Print related logs
 
 ```ts
 // src/index.ts
@@ -183,11 +169,11 @@ export async function createCLI() {
   });
 
   creator.on('start', ({prompts}) => {
-    prompts.log.info('Starting new project creation');
+    prompts.log.info('Start creating new project');
   });
 
   creator.on('written', (meta, data, override) => {
-    data.ctx.prompts.log.info(`File written: ${meta.targetPath}`);
+    data.ctx.prompts.log.info(`Write file: ${meta.targetPath}`);
   });
 
   creator.on('end', ({prompts}, meta) => {
@@ -231,7 +217,7 @@ export async function createCLI() {
 ```
 
 ### Dot files
-Create dot files (.*) in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with _ for proper handling in templates.
+Create dot (`.*`) files in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with `_` to handle them correctly in templates.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -240,7 +226,7 @@ templates/default/
 ```
 
 ### Underscore files
-In `templates`, creating dot files requires _* prefix, so creating underscore (_*) files requires double underscore prefix (__*).
+In `templates`, creating dot files requires `_*` prefix, so creating underscore (`_*`) files requires double underscore prefix (`__*`).
 ```bash
 templates/default/
 ├── __gitignore -> _gitignore
@@ -256,7 +242,7 @@ class Creator<T extends Record<string, unknown>> {
   constructor(options: CreatorOptions<T>);
 
   /**
-   * Start project creation
+   * Start creating project
    */
   create(): Promise<void>;
 
@@ -348,7 +334,6 @@ export type FileMeta = {
    * Full path to source file
    */
   sourceFile: string;
-
   /**
    * Root directory of target files
    */
@@ -466,7 +451,7 @@ Triggered before creation
 Triggered when creation starts
 
 #### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
-Triggered after file writing
+Triggered after file is written
 
 #### `creator.on('end', (context: CreatorContext) => unknown)`
 Triggered when creation ends
@@ -478,7 +463,7 @@ Intercept file writing. For example:
 - If `ssr` is configured, generate `src/client.ts` and `src/server.ts`
 - Otherwise
   - If source file is `client.ts`, rename to `index.ts`
-  - If source file is `server.ts`, skip generation
+  - If source file is `server.ts`, don't generate it
 
 ```ts
 creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) => {
@@ -489,7 +474,7 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
   ? {
     targetFileName: 'index.ts'
   }
-  // skip server.ts
+  // Don't write server.ts
   : {
     disableWrite: true
   }
@@ -502,6 +487,21 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
  * Safely execute prompts operations
  */
 function promptSafe<T>(promise: Promise<T | symbol>): Promise<T | symbol>;
+
+/**
+ * Initialize Git repository
+ */
+function initGitRepo(cwd: string): Promise<void>;
+
+/**
+ * Check Node.js version
+ */
+function checkNodeVersion(version: number): Promise<boolean>;
+
+/**
+ * Check for updates
+ */
+function checkUpdate(pkgName: string, currentVersion: string): Promise<boolean>;
 
 /**
  * Select Node.js version
@@ -530,11 +530,17 @@ function execCommand(
   command: string,
   options?: ExecOptions
 ): Promise<[Error | null, { stderr: string; stdout: string; exitCode: number }]>;
-```
 
-## Links
-- [prompts](https://www.npmjs.com/package/@clack/prompts)
-- [colors](https://www.npmjs.com/package/picocolors)
+/**
+ * @see https://www.npmjs.com/package/@clack/prompts
+ */
+export const prompts = Prompts;
+
+/**
+ * @see https://www.npmjs.com/package/picocolors
+ */
+export const colors = Colors;
+```
 
 
 ## License
