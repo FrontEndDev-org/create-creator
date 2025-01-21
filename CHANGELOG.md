@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.3.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.2.1...v2.3.0) (2025-01-21)
+
+
+### Features
+
+* **export:** 添加 checkNodeVersion 函数到 prompts 模块的导出列表中 ([4c5c0e9](https://github.com/FrontEndDev-org/create-creator/commit/4c5c0e99bb5f9f1acca6fbed14ffa09248171144))
+* **export:** 添加检查更新功能 ([4e0cd2a](https://github.com/FrontEndDev-org/create-creator/commit/4e0cd2a3cd560d983d72b58dcaa304d7c799f1db))
+* **index:** 新增 initGitRepo 工具方法 ([90b5026](https://github.com/FrontEndDev-org/create-creator/commit/90b502653824f7b9cd6e5c4aa1f815587ee99406))
+* 更新模板 vite 相关依赖大版本 ([8dd38ae](https://github.com/FrontEndDev-org/create-creator/commit/8dd38ae209ccd1a774e8d87ae2f040848e577087))
+* 添加初始化 Git 仓库的功能 ([dc6ba45](https://github.com/FrontEndDev-org/create-creator/commit/dc6ba4555b9fca7066b7cedd0dbd79d8230910ce))
+
+
+### Bug Fixes
+
+* **init:** 优化 Git 初始化流程和错误处理 ([d6f4bee](https://github.com/FrontEndDev-org/create-creator/commit/d6f4bee3164b5a2fd014047eb8619145b0447473))
+* **utils:** 修正 execCommand 函数的退出代码逻辑 ([369d5a2](https://github.com/FrontEndDev-org/create-creator/commit/369d5a2ff127df224e8657d82539f5ccff8cbe0c))
+
+
+### Performance Improvements
+
+* 移除检查包版本中的测试参数 ([db0d9c8](https://github.com/FrontEndDev-org/create-creator/commit/db0d9c81efcde84343f56ab18d9638eff5228e81))
+
 ## [2.2.1](https://github.com/FrontEndDev-org/create-creator/compare/v2.2.0...v2.2.1) (2025-01-20)
 
 
