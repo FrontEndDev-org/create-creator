@@ -96,14 +96,15 @@ export async function initGitRepo(cwd: string) {
   const spinner = prompts.spinner();
   spinner.start('Initializing Git repository...');
 
-  const [err, { stderr, exitCode }] = await execCommand('git init', { cwd });
+  const [err, { stdout, stderr, exitCode }] = await execCommand('git init', { cwd });
 
   if (err) {
     spinner.stop('Git repository initialization failed', exitCode);
+    prompts.log.error(stderr);
     throw new ExitError(err.message, 1);
   }
 
-  spinner.stop('Git repository initialized', exitCode);
+  spinner.stop(stdout, 0);
 }
 
 export function checkNodeVersion(requiredVersion = 18) {
