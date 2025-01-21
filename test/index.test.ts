@@ -21,6 +21,7 @@ it('should export prompts functions', () => {
   expect(index.selectWriteMode).toBeDefined();
   expect(index.initGitRepo).toBeDefined();
   expect(index.checkNodeVersion).toBeDefined();
+  expect(index.checkUpdate).toBeDefined();
 });
 
 it('should export execCommand', () => {
