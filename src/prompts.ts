@@ -115,25 +115,25 @@ export function checkNodeVersion(requiredVersion: number) {
     throw new ExitError(`Your Node.js version is old, please upgrade to ${requiredVersion} or higher`, 1);
   }
 
-  return adapted;
+  prompts.log.success(`Node.js version ${currentVersion} is compatible with ${requiredVersion}`);
 }
 
 export async function checkUpdate(options: PkgMeta & { version: string; projectPath: string }) {
-  const { version, name, distTag = 'latest', registry, projectPath } = options;
+  const { version: localVersion, name, distTag = 'latest', registry, projectPath } = options;
   const spinner = prompts.spinner();
 
   spinner.start('Checking for version updates...');
-  const [err, newVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
+  const [err, remoteVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
 
   if (err) {
     spinner.stop('Failed to check for updates', 1);
     throw new ExitError(`Failed to check for updates: ${err.message}`, 1);
   }
 
-  spinner.stop('Currently using the latest version', 0);
-
-  if (version !== newVersion) {
+  if (localVersion !== remoteVersion) {
     const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
-    throw new ExitError(`New version ${newVersion} is available, please use \`${command}\` instead.`, 1);
+    throw new ExitError(`New version ${remoteVersion} is available, please use \`${command}\` command instead.`, 1);
   }
+
+  spinner.stop('Currently using the latest version', 0);
 }
