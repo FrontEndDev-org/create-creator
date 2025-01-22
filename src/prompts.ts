@@ -107,7 +107,7 @@ export async function initGitRepo(cwd: string) {
   spinner.stop(stdout, 0);
 }
 
-export function checkNodeVersion(requiredVersion = 18) {
+export function checkNodeVersion(requiredVersion: number) {
   const currentVersion = Number.parseInt(process.version.replace(/^\D/, ''));
   const adapted = currentVersion >= requiredVersion;
 
