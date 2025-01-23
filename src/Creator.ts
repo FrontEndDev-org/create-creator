@@ -27,6 +27,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     cwd: '',
     templatesRoot: '',
     templateRoot: '',
+    templateNames: [],
     templateName: '',
     projectRoot: '',
     projectPath: '',
@@ -59,7 +60,6 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       : `create-${context.projectName}`;
 
     this.data = { ctx: context } as CreatorData<T>;
-
     this.#writeMW = new MiddleWare({
       cwd: context.templatesRoot,
     });
@@ -223,6 +223,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         fs.statSync(fullPath).isDirectory() // Only include actual directories
       );
     });
+    context.templateNames = templateNames;
 
     // Verify templates directory contains at least one valid template
     if (templateNames.length === 0) {
@@ -232,16 +233,18 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       );
     }
 
-    if (templateNames.length === 1) {
+    if (templateNames.length === 1 && !options.toTemplateOptions) {
       context.templateName = templateNames[0];
     } else {
       context.templateName = await promptSafe(
         prompts.select({
           message: 'Select a template',
-          options: templateNames.map((name) => ({
-            value: name,
-            label: name,
-          })),
+          options: options.toTemplateOptions
+            ? await options.toTemplateOptions(context)
+            : templateNames.map((name) => ({
+                value: name,
+                label: name,
+              })),
         }),
       );
     }

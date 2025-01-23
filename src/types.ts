@@ -2,7 +2,16 @@ import type * as prompts from '@clack/prompts';
 import type * as colors from 'picocolors';
 import type { BUILTIN_DATA_KEY } from './const';
 
+/**
+ * Type representing the @clack/prompts module
+ * @see https://www.npmjs.com/package/@clack/prompts
+ */
 export type Prompts = typeof prompts;
+
+/**
+ * Type representing the picocolors module
+ * @see https://www.npmjs.com/package/picocolors
+ */
 export type Colors = typeof colors;
 
 export type PkgMeta = {
@@ -45,6 +54,10 @@ export type CreatorContext = {
    * Path to selected template directory
    */
   templateRoot: string;
+  /**
+   * Names of selected template directories
+   */
+  templateNames: string[];
   /**
    * Name of selected template
    */
@@ -157,6 +170,21 @@ export type FileMeta = {
   targetFile: string;
 };
 
+export type TemplateOption = {
+  /**
+   * Unique identifier for the template option
+   */
+  value: string;
+  /**
+   * Display name for the template option
+   */
+  label?: string;
+  /**
+   * Additional description or hint about the template
+   */
+  hint?: string;
+};
+
 /**
  * Configuration options for the creator
  * @template T - Type of custom data to extend with
@@ -175,7 +203,15 @@ export type CreatorOptions<T> = {
    */
   templatesRoot: string;
   /**
+   * Convert creation context to template options
+   * @param context - The creation context containing information about the current process
+   * @returns Array of template options or promise resolving to array of template options
+   */
+  toTemplateOptions?: (context: CreatorContext) => TemplateOption[] | Promise<TemplateOption[]>;
+  /**
    * Extend template data with custom properties
+   * @param context - The creation context containing information about the current process
+   * @returns Extended template data or promise resolving to extended template data
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
 };
