@@ -1,7 +1,7 @@
 {
-  "name": "<%= ctx.packageName %>",
+  "name": "<%= packageName %>",
   "version": "1.0.0",
-  "description": "Create a new project - npm create <%= ctx.packageName.slice('create-'.length) %>",
+  "description": "Create a new project - npm create <%= packageName.slice('create-'.length) %>",
   "scripts": {
     "prepare": "lefthook install",
     <%_ if (codeLinter === 'biome') { _%>
