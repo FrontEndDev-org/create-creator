@@ -32,7 +32,6 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     projectRoot: '',
     projectPath: '',
     projectName: '',
-    packageName: '',
     writeMode: 'cancel',
   };
   data: CreatorData<T>;
@@ -55,9 +54,6 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     context.projectRoot = projectRoot;
     context.projectPath = path.relative(cwd, projectRoot) || '.';
     context.projectName = path.basename(context.projectRoot);
-    context.packageName = context.projectName.startsWith('create-')
-      ? context.projectName
-      : `create-${context.projectName}`;
 
     this.data = { ctx: context } as CreatorData<T>;
     this.#writeMW = new MiddleWare({

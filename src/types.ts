@@ -75,10 +75,6 @@ export type CreatorContext = {
    */
   projectName: string;
   /**
-   * Name of package being created
-   */
-  packageName: string;
-  /**
    * Current write mode (overwrite/clean/cancel)
    */
   writeMode: WriteMode;

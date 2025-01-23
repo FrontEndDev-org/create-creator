@@ -17,12 +17,13 @@ export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
     templatesRoot: path.join(__dirname, '../templates'),
-    async extendData() {
+    async extendData({ projectName }) {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
       const codeLinter = await selectCodeLinter();
 
       return {
+        packageName: projectName.startsWith('create-') ? projectName : `create-${projectName}`,
         nodeVersion,
         npmRegistry,
         codeLinter,
