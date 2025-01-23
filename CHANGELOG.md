@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.3.0...v2.4.0) (2025-01-23)
+
+
+### Features
+
+* **Creator:** 增加模板选项转换功能 ([3b60563](https://github.com/FrontEndDev-org/create-creator/commit/3b605630630a7a02d14ba68aebbec9145b43a1c5))
+* node 版本检查方法入参修改为必填 ([7a5250f](https://github.com/FrontEndDev-org/create-creator/commit/7a5250f15064b45d4b40d725803b481eb3e2adc9))
+
+
+### Bug Fixes
+
+* **src:** 优化 Creator 类中的 #extend 方法，避免无法中断取消过程 ([f038cac](https://github.com/FrontEndDev-org/create-creator/commit/f038cacb7f7395819736529649750f8b28876744))
+
 ## [2.3.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.2.1...v2.3.0) (2025-01-21)
 
 
