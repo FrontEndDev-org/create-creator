@@ -95,21 +95,16 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
   async #extend() {
     const { context, options } = this;
+    const externalData = await options.extendData?.call(null, context);
 
-    try {
-      const externalData = await options.extendData?.call(null, context);
-
-      if (externalData !== undefined && BUILTIN_DATA_KEY in externalData) {
-        throw new ExitError(`Extended data cannot contain the internal key name "${BUILTIN_DATA_KEY}"`, 1);
-      }
-
-      this.data = {
-        ...externalData,
-        ...this.data,
-      };
-    } catch (cause) {
-      //
+    if (externalData !== undefined && BUILTIN_DATA_KEY in externalData) {
+      throw new ExitError(`Extended data cannot contain the internal key name "${BUILTIN_DATA_KEY}"`, 1);
     }
+
+    this.data = {
+      ...externalData,
+      ...this.data,
+    };
   }
 
   async #generate() {
