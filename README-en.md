@@ -8,14 +8,14 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![npm version](https://img.shields.io/npm/v/create-creator?labelColor=5D5D5D&color=00CD39)](https://npmjs.com/package/create-creator)
 
-Create Creator.
+A scaffolding generator.
 
 ## Features
 
 - 🗝 Simple and easy to use, clean design
 - 🛠️ Template-based project generation
 - ⚙️ Interactive CLI configuration
-- 📦 Support for multiple templates
+- 📦 Multiple template support
 - 🧩 EJS template rendering
 
 ## Installation & Usage
@@ -138,12 +138,12 @@ export async function createCLI() {
     // ... other options
   });
 
-  // Don't generate eslint related files when eslint is not selected
+  // Don't generate eslint related files if eslint is not selected
   creator.writeIntercept(['eslint*', '.eslint*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'eslint',
   }));
 
-  // Don't generate biome related files when biome is not selected
+  // Don't generate biome related files if biome is not selected
   creator.writeIntercept(['biome*'], (meta, data) => ({
     disableWrite: data.codeLinter !== 'biome',
   }));
@@ -152,7 +152,7 @@ export async function createCLI() {
 }
 ```
 
-### Print related logs
+### Logging
 
 ```ts
 // src/index.ts
@@ -165,15 +165,15 @@ export async function createCLI() {
   });
 
   creator.on('before', ({prompts}) => {
-    prompts.log.info('Output some banner information');
+    prompts.log.info('Display some banner information');
   });
 
   creator.on('start', ({prompts}) => {
-    prompts.log.info('Start creating new project');
+    prompts.log.info('Starting new project creation');
   });
 
   creator.on('written', (meta, data, override) => {
-    data.ctx.prompts.log.info(`Write file: ${meta.targetPath}`);
+    data.ctx.prompts.log.info(`File written: ${meta.targetPath}`);
   });
 
   creator.on('end', ({prompts}, meta) => {
@@ -184,7 +184,7 @@ export async function createCLI() {
 }
 ```
 
-### Custom CLI selection interaction
+### Custom CLI selection
 ```ts
 // src/index.ts
 import { promptSafe } from 'create-creator';
@@ -217,7 +217,7 @@ export async function createCLI() {
 ```
 
 ### Dot files
-Create dot (`.*`) files in the templates/default directory, such as .gitignore and .npmrc. Note that since dot files are hidden in the file system, you need to prefix the filename with `_` to handle them correctly in templates.
+To create dot files (e.g., .gitignore, .npmrc) in templates/default directory, prefix the filename with `_` since dot files are hidden in file systems.
 ```bash
 templates/default/
 ├── _gitignore  -> .gitignore
@@ -242,7 +242,7 @@ class Creator<T extends Record<string, unknown>> {
   constructor(options: CreatorOptions<T>);
 
   /**
-   * Start creating project
+   * Start project creation
    */
   create(): Promise<void>;
 
@@ -284,6 +284,12 @@ export type CreatorOptions<T> = {
    * Root directory containing templates
    */
   templatesRoot: string;
+  /**
+   * Convert creation context to template options
+   * @param context - The creation context containing information about the current process
+   * @returns Array of template options or promise resolving to array of template options
+   */
+  toTemplateOptions?: (context: CreatorContext) => TemplateOption[] | Promise<TemplateOption[]>;
   /**
    * Extend template data with custom properties
    */
@@ -353,12 +359,12 @@ export type FileMeta = {
 };
 ```
 
-### `OverrideFileMeta`
+### `OverrideWrite`
 ```ts
 /**
  * Options to override default file writing behavior
  */
-export type OverrideFileMeta = {
+export type OverrideWrite = {
   /**
    * Whether to disable EJS rendering for EJS files
    */
@@ -396,6 +402,10 @@ export type CreatorContext = {
    */
   templateRoot: string;
   /**
+   * Names of selected template directories
+   */
+  templateNames: string[];
+  /**
    * Name of selected template
    */
   templateName: string;
@@ -411,10 +421,6 @@ export type CreatorContext = {
    * Name of project being created
    */
   projectName: string;
-  /**
-   * Name of package being created
-   */
-  packageName: string;
   /**
    * Current write mode (overwrite/clean/cancel)
    */
@@ -439,6 +445,7 @@ export type CreatorData<T> = {
 ### ExitError Class
 ```ts
 class ExitError extends Error {
+  exitCode: number;
   constructor(message: string);
 }
 ```
@@ -450,7 +457,7 @@ Triggered before creation
 #### `creator.on('start', (context: CreatorContext) => unknown)`
 Triggered when creation starts
 
-#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideFileMeta) => unknown)`
+#### `creator.on('written', (fileMeta: FileMeta, data: CreatorData<T>, override?: OverrideWrite) => unknown)`
 Triggered after file is written
 
 #### `creator.on('end', (context: CreatorContext) => unknown)`
@@ -458,12 +465,12 @@ Triggered when creation ends
 
 ### Interceptors
 #### `writeIntercept(paths: string | string[], interceptor: WriteInterceptor)`
-Intercept file writing. For example:
+Intercept file writing. Example:
 
 - If `ssr` is configured, generate `src/client.ts` and `src/server.ts`
 - Otherwise
   - If source file is `client.ts`, rename to `index.ts`
-  - If source file is `server.ts`, don't generate it
+  - If source file is `server.ts`, skip generation
 
 ```ts
 creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) => {
@@ -474,7 +481,7 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
   ? {
     targetFileName: 'index.ts'
   }
-  // Don't write server.ts
+  // skip server.ts
   : {
     disableWrite: true
   }

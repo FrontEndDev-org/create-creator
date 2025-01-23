@@ -285,6 +285,12 @@ export type CreatorOptions<T> = {
    */
   templatesRoot: string;
   /**
+   * Convert creation context to template options
+   * @param context - The creation context containing information about the current process
+   * @returns Array of template options or promise resolving to array of template options
+   */
+  toTemplateOptions?: (context: CreatorContext) => TemplateOption[] | Promise<TemplateOption[]>;
+  /**
    * Extend template data with custom properties
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
@@ -396,6 +402,10 @@ export type CreatorContext = {
    */
   templateRoot: string;
   /**
+   * Names of selected template directories
+   */
+  templateNames: string[];
+  /**
    * Name of selected template
    */
   templateName: string;
@@ -411,10 +421,6 @@ export type CreatorContext = {
    * Name of project being created
    */
   projectName: string;
-  /**
-   * Name of package being created
-   */
-  packageName: string;
   /**
    * Current write mode (overwrite/clean/cancel)
    */
