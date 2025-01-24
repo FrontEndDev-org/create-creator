@@ -83,7 +83,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         await fse.emptyDir(context.projectRoot);
         break;
       case 'cancel':
-        throw new ExitError('Canceled by user', 0);
+        throw new ExitError('Operation cancelled', 0);
       default:
         break;
     }
@@ -118,6 +118,21 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         1,
       );
     }
+
+    const spinner = prompts.spinner();
+    spinner.start('Generating project files.');
+    const [err] = await tryFlatten(this.#generateWriteFiles(paths));
+
+    if (err) {
+      spinner.stop('Failed to generate project files', 1);
+      throw new ExitError(`Failed to generate project files: ${err.message}`, 1);
+    }
+
+    spinner.stop('Generated project files', 0);
+  }
+
+  async #generateWriteFiles(paths: string[]) {
+    const { context, options } = this;
 
     for (const sourcePath of paths) {
       const sourceFileName = path.basename(sourcePath);
@@ -161,11 +176,11 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         targetFileName: path.basename(targetPath),
       };
 
-      await this.#write(fileMeta);
+      await this.#generateWriteFile(fileMeta);
     }
   }
 
-  async #write(fileMeta: FileMeta) {
+  async #generateWriteFile(fileMeta: FileMeta) {
     const { context, options } = this;
     const overrideFileMeta = await this.#writeMW.when(
       path.join(context.templateName, fileMeta.sourcePath),
@@ -184,9 +199,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     if (fileMeta.isEjsFile && !disableRenderEjs) {
       const template = await fse.readFile(fileMeta.sourceFile, 'utf8');
-      fse.outputFileSync(targetFile, ejs.render(template, this.data));
+      await fse.outputFile(targetFile, ejs.render(template, this.data));
     } else {
-      fse.copySync(fileMeta.sourceFile, targetFile);
+      await fse.copy(fileMeta.sourceFile, targetFile);
     }
 
     await this.emit('written', fileMeta, this.data, overrideFileMeta);
