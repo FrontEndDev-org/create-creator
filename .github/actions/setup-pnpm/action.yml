@@ -1,0 +1,20 @@
+name: setup
+description: 依照 nvmrc 创建 node 环境
+
+runs:
+  using: composite
+  steps:
+    - run: sudo timedatectl set-timezone Asia/Shanghai
+      shell: bash
+    - run: timedatectl
+      shell: bash
+    - uses: pnpm/action-setup@v4 # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#caching-packages-data
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+        cache-dependency-path: pnpm-lock.yaml
+    - run: corepack enable
+      shell: bash
+    - run: pnpm i
+      shell: bash
