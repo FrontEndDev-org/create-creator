@@ -25,11 +25,8 @@ node_modules
 .history
 !.vscode/extensions.json
 
-# dist and cache
+# dist
 /dist
-/dist-*
-/dist_*
-.cache
 
 # testing
 /coverage

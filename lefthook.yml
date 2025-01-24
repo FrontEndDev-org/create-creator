@@ -4,7 +4,7 @@
 pre-commit:
   parallel: true
   commands:
-    lint:
+    biome:
       glob: "*"
       run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
       stage_fixed: true
