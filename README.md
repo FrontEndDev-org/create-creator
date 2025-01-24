@@ -6,7 +6,7 @@
 [![dependency-review](https://github.com/FrontEndDev-org/create-creator/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/FrontEndDev-org/create-creator/actions/workflows/dependency-review.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
-[![npm version](https://img.shields.io/npm/v/create-creator?labelColor=5D5D5D&color=00CD39)](https://npmjs.com/package/create-creator)
+[![npm version](https://img.shields.io/npm/v/create-creator)](https://npmjs.com/package/create-creator)
 
 创建一个脚手架。
 
@@ -216,22 +216,16 @@ export async function createCLI() {
 }
 ```
 
-### 点文件
-在 templates/default 目录下创建点（`.*`）文件，例如 .gitignore 和 .npmrc。注意，由于点文件在文件系统中是隐藏文件，需要在文件名前加上 `_` 前缀，以便在模板中正确处理。
-```bash
-templates/default/
-├── _gitignore  -> .gitignore
-├── _npmrc      -> .npmrc
-└── README.md
-```
+### 特殊点文件
+在发布 npm 包的时候，`.gitignore` 和 `.npmignore` 两个文件会默认被忽略打包。此时，常规做法是
 
-### 下划线文件
-在 `templates` 中，创建点文件需要 `_*` 开头，那么创建下划线（`_*`）开头的文件，则需要两个下划线开头（`__*`）。
-```bash
-templates/default/
-├── __gitignore -> _gitignore
-├── __npmrc     -> _npmrc
-└── README.md
+1. 将 `.gitignore` 和 `.npmignore` 文件重命名为 `_gitignore` 和 `_npmignore`
+2. 添加自定义拦截器进行特殊处理
+```ts
+// 将任意目录下的 _gitignore 和 _npmignore 文件重命名为 .gitignore 和 .npmignore
+creator.writeIntercept(['**/_gitignore', '**/_npmignore'], (meta) => ({
+  targetFileName: meta.targetFileName.replace('_', '.'),
+}));
 ```
 
 ## API

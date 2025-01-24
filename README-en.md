@@ -6,16 +6,16 @@
 [![dependency-review](https://github.com/FrontEndDev-org/create-creator/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/FrontEndDev-org/create-creator/actions/workflows/dependency-review.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/4fa1acaeb717469caddfe21a84c50bb2)](https://app.codacy.com/gh/FrontEndDev-org/create-creator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
-[![npm version](https://img.shields.io/npm/v/create-creator?labelColor=5D5D5D&color=00CD39)](https://npmjs.com/package/create-creator)
+[![npm version](https://img.shields.io/npm/v/create-creator)](https://npmjs.com/package/create-creator)
 
-A scaffolding generator.
+A scaffolding creation tool.
 
 ## Features
 
-- 🗝 Simple and easy to use, clean design
+- 🗝 Simple and easy to use with clean design
 - 🛠️ Template-based project generation
 - ⚙️ Interactive CLI configuration
-- 📦 Multiple template support
+- 📦 Support for multiple templates
 - 🧩 EJS template rendering
 
 ## Installation & Usage
@@ -60,22 +60,22 @@ my-creator
 ├── .nvmrc
 ├── README.md
 ├── bin
-│   └── index.cjs
+│   └── index.cjs
 ├── biome.jsonc
 ├── commitlint.config.mjs
 ├── lefthook.yml
 ├── package.json
 ├── src
-│   ├── const.ts
-│   ├── dts
-│   │   ├── global.d.ts
-│   │   └── types.d.ts
-│   └── index.ts
+│   ├── const.ts
+│   ├── dts
+│   │   ├── global.d.ts
+│   │   └── types.d.ts
+│   └── index.ts
 ├── templates
-│   └── default
-│       └── README.md.ejs
+│   └── default
+│       └── README.md.ejs
 ├── test
-│   └── sample.test.ts
+│   └── sample.test.ts
 ├── tsconfig.json
 └── vite.config.mts
 ```
@@ -98,7 +98,7 @@ export async function createCLI() {
 ### Open `templates` to write template files
 - templates is the root directory for templates
 - templates/default is a specific template directory, can be any name
-- If there are multiple directories under templates, they will be available for user selection during project creation
+- If there are multiple directories under templates, users can choose during project creation
 
 ## Examples
 
@@ -129,7 +129,7 @@ Created by: <%= author %>
 Created at: <%= timestamp %>
 ```
 
-### Conditionally render different template files
+### Render different template files based on conditions
 
 ```ts
 // src/index.ts
@@ -152,7 +152,7 @@ export async function createCLI() {
 }
 ```
 
-### Logging
+### Print related logs
 
 ```ts
 // src/index.ts
@@ -165,7 +165,7 @@ export async function createCLI() {
   });
 
   creator.on('before', ({prompts}) => {
-    prompts.log.info('Display some banner information');
+    prompts.log.info('Output some banner information');
   });
 
   creator.on('start', ({prompts}) => {
@@ -184,7 +184,7 @@ export async function createCLI() {
 }
 ```
 
-### Custom CLI selection
+### Custom CLI selection interaction
 ```ts
 // src/index.ts
 import { promptSafe } from 'create-creator';
@@ -216,22 +216,16 @@ export async function createCLI() {
 }
 ```
 
-### Dot files
-To create dot files (e.g., .gitignore, .npmrc) in templates/default directory, prefix the filename with `_` since dot files are hidden in file systems.
-```bash
-templates/default/
-├── _gitignore  -> .gitignore
-├── _npmrc      -> .npmrc
-└── README.md
-```
+### Special dot files
+When publishing npm packages, `.gitignore` and `.npmignore` files are ignored by default. The conventional approach is:
 
-### Underscore files
-In `templates`, creating dot files requires `_*` prefix, so creating underscore (`_*`) files requires double underscore prefix (`__*`).
-```bash
-templates/default/
-├── __gitignore -> _gitignore
-├── __npmrc     -> _npmrc
-└── README.md
+1. Rename `.gitignore` and `.npmignore` to `_gitignore` and `_npmignore`
+2. Add custom interceptors for special handling
+```ts
+// Rename _gitignore and _npmignore files in any directory to .gitignore and .npmignore
+creator.writeIntercept(['**/_gitignore', '**/_npmignore'], (meta) => ({
+  targetFileName: meta.targetFileName.replace('_', '.'),
+}));
 ```
 
 ## API
@@ -465,12 +459,12 @@ Triggered when creation ends
 
 ### Interceptors
 #### `writeIntercept(paths: string | string[], interceptor: WriteInterceptor)`
-Intercept file writing. Example:
+Intercept file writing. For example:
 
 - If `ssr` is configured, generate `src/client.ts` and `src/server.ts`
 - Otherwise
   - If source file is `client.ts`, rename to `index.ts`
-  - If source file is `server.ts`, skip generation
+  - If source file is `server.ts`, don't generate
 
 ```ts
 creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) => {
@@ -481,7 +475,7 @@ creator.writeIntercept(['*/src/client.ts', '*/src/server.ts'], (fileMeta, data) 
   ? {
     targetFileName: 'index.ts'
   }
-  // skip server.ts
+  // Don't write server.ts
   : {
     disableWrite: true
   }
@@ -548,7 +542,6 @@ export const prompts = Prompts;
  */
 export const colors = Colors;
 ```
-
 
 ## License
 
