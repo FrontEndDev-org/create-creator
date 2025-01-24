@@ -9,7 +9,7 @@ import { tryFlatten } from 'try-flatten';
 import { ExitError } from './ExitError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
-import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
+import { BUILTIN_DATA_KEY, EJS_FILE_REGEX, EJS_FILE_SUFFIX } from './const';
 import { colors, prompts, selectTemplate, selectWriteMode } from './prompts';
 import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideWrite } from './types';
 import { isDirectory } from './utils';
@@ -109,7 +109,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     const paths = await glob('**/*', {
       nodir: true,
       cwd: context.templateRoot,
-      dot: false,
+      dot: true,
     });
 
     // Verify selected template contains files
@@ -149,32 +149,14 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       const sourceFile = path.join(context.templateRoot, sourcePath);
 
       const isEjsFile = EJS_FILE_REGEX.test(sourceFileName);
-      const isUnderscoreFile = sourceFileName.startsWith(UNDERSCORE_FILE_PREFIX);
-      const isDotFile = !isUnderscoreFile && sourceFileName.startsWith(DOT_FILE_PREFIX);
-
-      let start = 0;
-      let end = undefined;
-      let prefix = '';
-
-      if (isEjsFile) {
-        end = -EJS_FILE_SUFFIX.length;
-      }
-
-      if (isUnderscoreFile) {
-        start = UNDERSCORE_FILE_PREFIX.length;
-        prefix = '_';
-      } else if (isDotFile) {
-        start = DOT_FILE_PREFIX.length;
-        prefix = '.';
-      }
-
-      const targetPath = path.join(sourceFolder, prefix + sourceFileName.slice(start, end));
+      const targetPath = path.join(
+        sourceFolder,
+        sourceFileName.slice(0, isEjsFile ? -EJS_FILE_SUFFIX.length : undefined),
+      );
       const targetFile = path.join(context.projectRoot, targetPath);
 
       const fileMeta: FileMeta = {
-        isDotFile,
         isEjsFile: isEjsFile,
-        isUnderscoreFile,
         sourcePath,
         sourceFile,
         sourceRoot: context.templateRoot,

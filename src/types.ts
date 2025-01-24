@@ -122,14 +122,6 @@ export type FileMeta = {
    * Whether file uses EJS templating
    */
   isEjsFile: boolean;
-  /**
-   * Whether file uses underscore prefix
-   */
-  isUnderscoreFile: boolean;
-  /**
-   * Whether file uses dot prefix
-   */
-  isDotFile: boolean;
 
   /**
    * Root directory of source files
