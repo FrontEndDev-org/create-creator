@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.8.0...v2.9.0) (2025-01-24)
+
+
+### Miscellaneous Chores
+
+* release 2.9.0 ([14c1f0e](https://github.com/FrontEndDev-org/create-creator/commit/14c1f0e731f0e6395884b7669139c886b515036b))
+
 ## [2.8.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.7.0...v2.8.0) (2025-01-24)
 
 
