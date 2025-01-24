@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.5.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.4.0...v2.5.0) (2025-01-24)
+
+
+### Features
+
+* ** Creator:** 优化项目文件生成过程 ([cfd76de](https://github.com/FrontEndDev-org/create-creator/commit/cfd76def3266ac02feb939064974189093298dbf))
+
+
+### Bug Fixes
+
+* **prompts:** 优化 git 仓库初始化成功提示信息 ([af8ae0c](https://github.com/FrontEndDev-org/create-creator/commit/af8ae0c752e21c9ac59126a3954a52c0937b8bb1))
+
 ## [2.4.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.3.0...v2.4.0) (2025-01-23)
 
 
