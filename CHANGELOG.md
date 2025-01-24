@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.6.0...v2.7.0) (2025-01-24)
+
+
+### Features
+
+* 优化项目模板配置 ([15a4564](https://github.com/FrontEndDev-org/create-creator/commit/15a45640a0b142a5d7e9b5b3139795b09c1121a7))
+
 ## [2.6.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.5.0...v2.6.0) (2025-01-24)
 
 
