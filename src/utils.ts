@@ -34,7 +34,11 @@ export async function checkPkgVersion(pkg: PkgMeta) {
   url.pathname = path.join(pkg.name, pkg.distTag || 'latest');
 
   const resp = await fetch(url.toString());
-  const { version } = (await resp.json()) as { version: string };
 
-  return version;
+  if (!resp.ok) return '';
+  if (!resp.headers.get('content-type')?.includes('application/json')) return '';
+
+  const { version } = (await resp.json()) as { version?: string };
+
+  return version || '';
 }
