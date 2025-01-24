@@ -148,9 +148,9 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       const sourceFolder = path.dirname(sourcePath);
       const sourceFile = path.join(context.templateRoot, sourcePath);
 
-      const isEjsFile = EJS_FILE_REGEX.test(sourcePath);
-      const isUnderscoreFile = sourcePath.startsWith(UNDERSCORE_FILE_PREFIX);
-      const isDotFile = !isUnderscoreFile && sourcePath.startsWith(DOT_FILE_PREFIX);
+      const isEjsFile = EJS_FILE_REGEX.test(sourceFileName);
+      const isUnderscoreFile = sourceFileName.startsWith(UNDERSCORE_FILE_PREFIX);
+      const isDotFile = !isUnderscoreFile && sourceFileName.startsWith(DOT_FILE_PREFIX);
 
       let start = 0;
       let end = undefined;
