@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.11.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.10.1...v2.11.0) (2025-01-24)
+
+
+### Features
+
+* ** Creator:** 去除了对点文件开头的文件的特殊处理，由外部拦截器控制 ([37e4bfc](https://github.com/FrontEndDev-org/create-creator/commit/37e4bfce52edc22f9d248e87b925f24e6bbf847a))
+* **template:** 为项目添加持续集成和交付流程 ([a146550](https://github.com/FrontEndDev-org/create-creator/commit/a146550a4ef302ae2e1db7c42a2fc03e9d78b951))
+* 修改 .gitignore 文件名并优化模板处理 ([227287d](https://github.com/FrontEndDev-org/create-creator/commit/227287d7edf48d782ffbc3c0b4b5bf4026a7c255))
+
 ## [2.10.1](https://github.com/FrontEndDev-org/create-creator/compare/v2.10.0...v2.10.1) (2025-01-24)
 
 
