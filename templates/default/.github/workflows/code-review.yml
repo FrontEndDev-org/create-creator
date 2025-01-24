@@ -1,0 +1,32 @@
+# 代码格式、基本质量检查
+
+name: code review
+
+on:
+  push:
+    branches:
+      - v*.x
+  pull_request:
+  schedule:
+    # 19:00(UTC) 每天，相当于 03:00(GMT+8)
+    - cron: '0 19 * * *'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-npm
+      - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-npm
+      - run: npm run test:coverage
+      - uses: codacy/codacy-coverage-reporter-action@v1
+        if: github.actor != 'dependabot[bot]'
+        with:
+          api-token: ${{ secrets.CODACY_API_TOKEN }}
+          coverage-reports: coverage/lcov.info
