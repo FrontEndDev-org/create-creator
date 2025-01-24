@@ -38,8 +38,11 @@
   ],
   "author": "云淡然 <hi@ydr.me> (https://ydr.me)",
   "license": "MIT",
-  "homepage": "https://github.com/frontenddev-org/create-creator",
-  "repository": "https://github.com/frontenddev-org/create-creator",
+  "homepage": "https://github.com/FrontEndDev-org/create-creator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrontEndDev-org/create-creator.git"
+  },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
     "ejs": "^3.1.10",
