@@ -139,9 +139,11 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
     throw new ExitError(`Failed to check for updates: ${err.message}`, 1);
   }
 
-  if (localVersion !== remoteVersion) {
+  // 如果当前 package 还没有发布，则远程版本为空
+  if (remoteVersion && localVersion !== remoteVersion) {
+    spinner.stop(`New version ${remoteVersion} is available`, 1);
     const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
-    throw new ExitError(`New version ${remoteVersion} is available, please use \`${command}\` command instead.`, 1);
+    throw new ExitError(`Please use \`${command}\` command instead.`, 1);
   }
 
   spinner.stop('Currently using the latest version', 0);
