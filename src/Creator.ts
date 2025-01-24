@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path/posix';
 import process from 'node:process';
+import { setTimeout } from 'node:timers/promises';
 import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
@@ -120,15 +121,23 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     }
 
     const spinner = prompts.spinner();
+    let files = 0;
     spinner.start('Generating project files ...');
+    const onWritten = async (fileMeta: FileMeta) => {
+      files++;
+      spinner.message(`${colors.gray('+')} ${colors.green(fileMeta.targetPath)}`);
+      await setTimeout(Math.random() * 100);
+    };
+    this.on('written', onWritten);
     const [err] = await tryFlatten(this.#generateWriteFiles(paths));
+    this.off('written', onWritten);
 
     if (err) {
       spinner.stop('Failed to generate project files', 1);
       throw new ExitError(err.message, 1);
     }
 
-    spinner.stop('Generated project files', 0);
+    spinner.stop(`Generated project ${files} files`, 0);
   }
 
   async #generateWriteFiles(paths: string[]) {
