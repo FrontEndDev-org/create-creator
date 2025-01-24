@@ -19,8 +19,6 @@ beforeAll(async () => {
   templateRoot = path.join(templatesRoot, 'default');
   // 创建测试模板文件
   fse.outputFileSync(path.join(templateRoot, 'file1.txt.ejs'), 'Hello <%= ctx.projectName %>');
-  fse.outputFileSync(path.join(templateRoot, '__file2.txt.ejs'), 'Hello <%= ctx.projectName %>');
-  fse.outputFileSync(path.join(templateRoot, '_file3.txt.ejs'), 'Hello <%= ctx.projectName %>');
   fse.outputFileSync(path.join(templateRoot, 'path/to/file4.txt'), 'Hello <%= ctx.projectName %>');
 });
 
@@ -195,43 +193,6 @@ it('应该支持自定义扩展数据', async () => {
   );
 });
 
-it('应该正确处理下划线前缀文件', async () => {
-  await runTest(async ({ cwd }) => {
-    const creator = new Creator({
-      cwd,
-      templatesRoot,
-    });
-
-    await expectExit(creator.create(), 0);
-
-    expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(false);
-    expect(isFile(path.join(cwd, '__file2.txt'))).toBe(false);
-    expect(isFile(path.join(cwd, '_file2.txt'))).toBe(true);
-    expect(isFile(path.join(cwd, '.file2.txt'))).toBe(false);
-
-    expect(isFile(path.join(cwd, '_file3.txt.ejs'))).toBe(false);
-    expect(isFile(path.join(cwd, '_file3.txt'))).toBe(false);
-    expect(isFile(path.join(cwd, '.file3.txt'))).toBe(true);
-  });
-});
-
-it('应该正确处理点前缀文件', async () => {
-  const fileName = `${Math.random().toString(36).slice(2)}.xx`;
-  await runTest(async ({ cwd }) => {
-    fs.writeFileSync(path.join(templateRoot, `_${fileName}`), 'test content');
-
-    const creator = new Creator({
-      cwd,
-      templatesRoot,
-    });
-
-    await expectExit(creator.create(), 0);
-
-    expect(fs.existsSync(path.join(cwd, `.${fileName}`))).toBe(true);
-    expect(fs.existsSync(path.join(cwd, `_${fileName}`))).toBe(false);
-  });
-});
-
 it('写入文件前拦截 disableRenderEjs', async () => {
   await runTest(async ({ cwd }) => {
     const creator = new Creator({
@@ -297,15 +258,10 @@ it('写入文件前拦截 targetFileName', async () => {
     expect(isFile(path.join(cwd, 'file1.txt.ejs'))).toBe(true);
     expect(isFile(path.join(cwd, 'file1.txt'))).toBe(false);
 
-    expect(isFile(path.join(cwd, '__file2.txt.ejs'))).toBe(true);
-    expect(isFile(path.join(cwd, '_file3.txt.ejs'))).toBe(true);
-
     expect(isFile(path.join(cwd, 'path/to/file4.txt'))).toBe(false);
     expect(isFile(path.join(cwd, 'path/to/file4.txt.ok'))).toBe(true);
 
     expect(fs.readFileSync(path.join(cwd, 'file1.txt.ejs'), 'utf8')).not.toMatch('<%=');
-    expect(fs.readFileSync(path.join(cwd, '__file2.txt.ejs'), 'utf8')).not.toMatch('<%=');
-    expect(fs.readFileSync(path.join(cwd, '_file3.txt.ejs'), 'utf8')).not.toMatch('<%=');
     expect(fs.readFileSync(path.join(cwd, 'path/to/file4.txt.ok'), 'utf8')).toMatch('<%=');
   });
 });

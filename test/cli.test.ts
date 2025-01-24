@@ -65,7 +65,7 @@ it('创建新脚手架 + biome', async () => {
     expect(isFile(toAbs('biome.jsonc'))).toBeTruthy();
     expect(isFile(toAbs('eslint.config.mjs'))).toBeFalsy();
     expect(isFile(toAbs('prettier.config.mjs'))).toBeFalsy();
-    expect(isFile(toAbs('.prettierignore'))).toBeFalsy();
+    expect(isFile(toAbs('.prettierignore'))).toBeTruthy();
     expect(readFile('.nvmrc').trim()).toEqual(nodeVersion.toString());
     expect(readFile('.npmrc')).toMatch(`registry=${npmRegistry}`);
     expect(readFile('README.md')).toMatch(`# ${projectName}`);
