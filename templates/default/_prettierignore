@@ -25,13 +25,18 @@ yarn.lock
 # Editor directories and files
 .idea
 .vscode
-!.vscode/extensions.json
+.history
 
-# dist and cache
+# dist
 /dist
-/dist-*
-/dist_*
-.cache
 
 # testing
 /coverage
+
+# typescript
+*.tsbuildinfo
+
+# release-please
+.release-please-manifest.json
+
+

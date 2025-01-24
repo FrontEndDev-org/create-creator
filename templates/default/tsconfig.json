@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "jsx": "react",
     "target": "ES2023",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -13,13 +12,18 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
 
     "lib": ["ES2023", "DOM"],
     "types": [],
-    "plugins": []
+    "plugins": [],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src", "test", "*.ts", "*.mts"]
+  "include": ["**/*.ts", "**/*.mts", "**/*.tsx", "**/*.vue"],
 }
+
+
