@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.8.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.7.0...v2.8.0) (2025-01-24)
+
+
+### Bug Fixes
+
+* **utils:** 重构包版本检查逻辑并添加错误处理 ([8cb8673](https://github.com/FrontEndDev-org/create-creator/commit/8cb8673ecfdcdb07a28cd9983a2953c292f1ff5e))
+
+
+### Miscellaneous Chores
+
+* release 2.8.0 ([9d1e5d9](https://github.com/FrontEndDev-org/create-creator/commit/9d1e5d99a1f52181555eac1a80c5c4cfdcb01e4d))
+
 ## [2.7.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.6.0...v2.7.0) (2025-01-24)
 
 
