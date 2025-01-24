@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.10.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.9.0...v2.10.0) (2025-01-24)
+
+
+### Features
+
+* ** Creator:** 添加项目文件生成实时反馈 ([a21b9a8](https://github.com/FrontEndDev-org/create-creator/commit/a21b9a84b22ff59f5943b7081063bb58b6145a14))
+* **default:** 重命名类型定义文件并扩展环境变量定义 ([a7f5f6a](https://github.com/FrontEndDev-org/create-creator/commit/a7f5f6a75853e4fc0ca270797d4e760666bfed9d))
+* **prompts:** 优化 Git 仓库初始化成功提示信息 ([00edc95](https://github.com/FrontEndDev-org/create-creator/commit/00edc95e1be3cb9b5e4ca169ac60509369ea9e78))
+* **TypedEvents:** 添加 off 方法支持事件移除 ([f4bb3a2](https://github.com/FrontEndDev-org/create-creator/commit/f4bb3a29798f634fd356d2699b898e2dccc79490))
+
+
+### Bug Fixes
+
+* **cli:** 移除项目创建成功提示语的感叹号 ([347a331](https://github.com/FrontEndDev-org/create-creator/commit/347a33198c5b6794c5be0e086212f5d56b8a15b4))
+
 ## [2.9.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.8.0...v2.9.0) (2025-01-24)
 
 
