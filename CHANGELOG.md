@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.1](https://github.com/FrontEndDev-org/create-creator/compare/v2.10.0...v2.10.1) (2025-01-24)
+
+
+### Bug Fixes
+
+* 优化文件名判断逻辑 ([6199383](https://github.com/FrontEndDev-org/create-creator/commit/61993837723b455712c42c4f8b0e980c0c987d8e))
+
 ## [2.10.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.9.0...v2.10.0) (2025-01-24)
 
 
