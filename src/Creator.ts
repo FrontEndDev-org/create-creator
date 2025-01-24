@@ -9,9 +9,9 @@ import { ExitError } from './ExitError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, DOT_FILE_PREFIX, EJS_FILE_REGEX, EJS_FILE_SUFFIX, UNDERSCORE_FILE_PREFIX } from './const';
-import { colors, promptSafe, prompts, selectWriteMode } from './prompts';
+import { colors, prompts, selectTemplate, selectWriteMode } from './prompts';
 import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideWrite } from './types';
-import { checkPkgVersion, isDirectory } from './utils';
+import { isDirectory } from './utils';
 
 /**
  * Main class for handling project creation
@@ -120,12 +120,12 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     }
 
     const spinner = prompts.spinner();
-    spinner.start('Generating project files.');
+    spinner.start('Generating project files ...');
     const [err] = await tryFlatten(this.#generateWriteFiles(paths));
 
     if (err) {
       spinner.stop('Failed to generate project files', 1);
-      throw new ExitError(`Failed to generate project files: ${err.message}`, 1);
+      throw new ExitError(err.message, 1);
     }
 
     spinner.stop('Generated project files', 0);
@@ -242,17 +242,8 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     if (templateNames.length === 1 && !options.toTemplateOptions) {
       context.templateName = templateNames[0];
     } else {
-      context.templateName = await promptSafe(
-        prompts.select({
-          message: 'Select a template',
-          options: options.toTemplateOptions
-            ? await options.toTemplateOptions(context)
-            : templateNames.map((name) => ({
-                value: name,
-                label: name,
-              })),
-        }),
-      );
+      const templates = options.toTemplateOptions ? await options.toTemplateOptions(context) : templateNames;
+      context.templateName = await selectTemplate(templates);
     }
 
     context.templateRoot = path.join(context.templatesRoot, context.templateName);

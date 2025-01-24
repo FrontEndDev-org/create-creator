@@ -1,9 +1,6 @@
-import cp from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path/posix';
-import * as clackPrompts from '@clack/prompts';
 import fse from 'fs-extra';
-import * as colors from 'picocolors';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { Creator } from '../src';
 import * as prompts from '../src/prompts';
@@ -25,7 +22,6 @@ beforeAll(async () => {
   fse.outputFileSync(path.join(templateRoot, '__file2.txt.ejs'), 'Hello <%= ctx.projectName %>');
   fse.outputFileSync(path.join(templateRoot, '_file3.txt.ejs'), 'Hello <%= ctx.projectName %>');
   fse.outputFileSync(path.join(templateRoot, 'path/to/file4.txt'), 'Hello <%= ctx.projectName %>');
-  vi.mock('@clack/prompts');
 });
 
 afterAll(() => {
@@ -342,7 +338,7 @@ it('外置模板源', { timeout: 30 * 1000 }, async () => {
       // 移动模板文件到模板根目录
       const dirs = fse.readdirSync(createViteRoot).filter((name) => name.startsWith('template-'));
       templateName = dirs[0];
-      vi.spyOn(clackPrompts, 'select').mockResolvedValue(templateName);
+      vi.spyOn(prompts, 'selectTemplate').mockResolvedValue(templateName);
 
       for (const dir of dirs) {
         fse.moveSync(path.join(createViteRoot, dir), path.join(templatesRoot, dir));

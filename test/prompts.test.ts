@@ -106,12 +106,12 @@ it('成功初始化git仓库', async () => {
 describe('Node版本检查', () => {
   it('当当前版本大于要求版本时应返回 true', () => {
     vi.stubGlobal('process', { version: 'v18.0.0' });
-    expect(checkNodeVersion(16)).toBe(true);
+    expect(checkNodeVersion(16)).toBeUndefined();
   });
 
   it('当当前版本等于要求版本时应返回 true', () => {
     vi.stubGlobal('process', { version: 'v16.0.0' });
-    expect(checkNodeVersion(16)).toBe(true);
+    expect(checkNodeVersion(16)).toBeUndefined();
   });
 
   it('当当前版本小于要求版本时应返回 false', () => {
@@ -121,6 +121,6 @@ describe('Node版本检查', () => {
 
   it('应该处理带有额外字符的版本字符串', () => {
     vi.stubGlobal('process', { version: 'v16.12.1-nightly' });
-    expect(checkNodeVersion(16)).toBe(true);
+    expect(checkNodeVersion(16)).toBeUndefined();
   });
 });

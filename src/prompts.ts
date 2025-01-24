@@ -15,6 +15,15 @@ export async function promptSafe<T>(promise: Promise<T | symbol>) {
   return r;
 }
 
+export async function selectTemplate(templates: string[] | { value: string; label?: string; hint?: string }[]) {
+  return promptSafe(
+    prompts.select({
+      message: 'Select a template',
+      options: templates.map((option) => (typeof option === 'string' ? { value: option } : option)),
+    }),
+  );
+}
+
 export async function selectNodeVersion(versions: number[] = [22, 20, 18, 16, 14]) {
   return promptSafe(
     prompts.select({
