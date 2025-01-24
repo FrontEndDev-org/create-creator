@@ -53,6 +53,10 @@ export async function createCLI() {
     prompts.outro('🎉🎉🎉');
   });
 
+  creator.writeIntercept(['*/_gitignore'], (meta) => ({
+    targetFileName: meta.targetFileName.replace('_', '.'),
+  }));
+
   creator.writeIntercept(['*/templates/**/*.ejs'], (meta, data) => ({
     disableRenderEjs: true,
     targetFileName: meta.sourceFileName,
