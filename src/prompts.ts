@@ -104,7 +104,7 @@ export async function initGitRepo(cwd: string) {
     throw new ExitError(err.message, 1);
   }
 
-  spinner.stop(stdout, 0);
+  spinner.stop(stdout || 'Git repository initialized successfully', 0);
 }
 
 export function checkNodeVersion(requiredVersion: number) {
