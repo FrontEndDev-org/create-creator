@@ -48,7 +48,7 @@ export async function createCLI() {
   creator.on('end', async ({ projectRoot, projectPath }) => {
     await initGitRepo(projectRoot);
 
-    prompts.log.success('The project has been created successfully!');
+    prompts.log.success('The project has been created successfully');
     prompts.log.success(`${colors.bold(colors.greenBright(`cd ${projectPath}`))} to start your coding journey`);
     prompts.outro('🎉🎉🎉');
   });
