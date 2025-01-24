@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.6.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.5.0...v2.6.0) (2025-01-24)
+
+
+### Bug Fixes
+
+* **prompts:** 优化版本检查逻辑和提示信息 ([fa653d5](https://github.com/FrontEndDev-org/create-creator/commit/fa653d56c03dc9ec6502dc25e1c1d6a284ba7741))
+* **utils:** 优化软件包版本检查函数 ([b1b458b](https://github.com/FrontEndDev-org/create-creator/commit/b1b458b7d9373509107546f19f2c9888d49c26c7))
+
+
+### Miscellaneous Chores
+
+* release 2.6.0 ([98464fc](https://github.com/FrontEndDev-org/create-creator/commit/98464fce8fed4a582a5b58e877cabc042e7ded92))
+
 ## [2.5.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.4.0...v2.5.0) (2025-01-24)
 
 
