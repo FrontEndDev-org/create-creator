@@ -1,6 +1,7 @@
 import { type ExecOptions, exec } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path/posix';
+import { tryFlatten } from 'try-flatten';
 import type { PkgMeta } from './types';
 
 export function isDirectory(p: string): boolean {
@@ -33,12 +34,14 @@ export async function checkPkgVersion(pkg: PkgMeta) {
   const url = new URL(pkg.registry || 'https://registry.npmjs.org');
   url.pathname = path.join(pkg.name, pkg.distTag || 'latest');
 
-  const resp = await fetch(url.toString());
+  const [err1, resp] = await tryFlatten(fetch(url.toString()));
+  if (err1) return '';
 
   if (!resp.ok) return '';
   if (!resp.headers.get('content-type')?.includes('application/json')) return '';
 
-  const { version } = (await resp.json()) as { version?: string };
+  const [err2, json] = await tryFlatten<{ version?: string }>(resp.json());
+  if (err2) return '';
 
-  return version || '';
+  return json.version || '';
 }

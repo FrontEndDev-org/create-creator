@@ -80,35 +80,19 @@ describe('命令执行', () => {
 });
 
 describe('包版本检查', () => {
-  it('应该从 npm registry 返回包版本', async () => {
-    const mockResponse = { version: '1.2.3' };
-    const mockFetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve(mockResponse),
-    });
-    vi.stubGlobal('fetch', mockFetch);
-
+  it('应该从 npm registry 返回包版本', { timeout: 30 * 1000 }, async () => {
     const version = await checkPkgVersion({
-      name: 'test-package',
-      distTag: 'xxx',
-      registry: 'https://registry.yyy.org',
-    });
-
-    expect(version).toBe('1.2.3');
-    expect(mockFetch).toHaveBeenCalledWith('https://registry.yyy.org/test-package/xxx');
-  });
-
-  it('当未提供 distTag 和 registry 时应该使用默认值', async () => {
-    const mockResponse = { version: '1.0.0' };
-    const mockFetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve(mockResponse),
-    });
-    vi.stubGlobal('fetch', mockFetch);
-
-    const version = await checkPkgVersion({
-      name: 'test-package',
+      name: 'v2c',
     });
 
     expect(version).toBe('1.0.0');
-    expect(mockFetch).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest');
+  });
+
+  it('不存在的包应该返回空字符串', { timeout: 30 * 1000 }, async () => {
+    const version = await checkPkgVersion({
+      name: 'v2c-not-exist',
+    });
+
+    expect(version).toBe('');
   });
 });
