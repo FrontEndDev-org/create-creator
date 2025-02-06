@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.12.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.11.0...v2.12.0) (2025-02-06)
+
+
+### Features
+
+* **deps:** 更新项目依赖版本 ([62be5c7](https://github.com/FrontEndDev-org/create-creator/commit/62be5c7f43d6233b3576db45aac0aba892f68d85))
+* 更新模板工程文件 ([51dc70d](https://github.com/FrontEndDev-org/create-creator/commit/51dc70dfd011ce3a3debe193f6970ebf8d3e5ed8))
+
 ## [2.11.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.10.1...v2.11.0) (2025-01-24)
 
 
