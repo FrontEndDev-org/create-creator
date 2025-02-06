@@ -13,15 +13,20 @@ export default antfu(
     yaml: true,
     typescript: true,
     ignores: [
-      ".*",
-      "node_modules",
-      "/dist/**",
-      "/public/**",
-      "/coverage/**",
+      // node
+      "**/node_modules/**",
       "package.json",
       "package-lock.json",
       "pnpm-lock.{yml,yaml}",
-      "yarn.lock"
+      "yarn.lock",
+      // vite
+      "dist/**",
+      "public/**",
+      // vitest
+      "coverage/**",
+      // dot files
+      '**/.*',
+
     ],
     stylistic: {
       semi: prettierConfig.semi,
@@ -35,8 +40,8 @@ export default antfu(
       },
     },
     rules: {
-      'unused-imports/no-unused-imports': 'off',
       'unused-imports/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
       'no-console': 'off',
     },
   },

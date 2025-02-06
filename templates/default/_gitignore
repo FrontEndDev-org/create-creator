@@ -10,7 +10,7 @@ Thumbs.db
 # Node
 node_modules
 
-# local env files
+# Local env files
 .env.local
 .env.*.local
 
@@ -25,13 +25,13 @@ node_modules
 .history
 !.vscode/extensions.json
 
-# dist
+# Vite
 /dist
 
-# testing
+# Vitest
 /coverage
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 
 

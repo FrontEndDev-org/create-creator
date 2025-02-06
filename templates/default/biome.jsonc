@@ -9,15 +9,19 @@
   "files": {
     "ignoreUnknown": true,
     "ignore": [
-      ".*",
-      "node_modules",
-      "/dist/**",
-      "/public/**",
-      "/coverage/**",
+      // node
+      "**/node_modules/**",
       "package.json",
       "package-lock.json",
       "pnpm-lock.{yml,yaml}",
-      "yarn.lock"
+      "yarn.lock",
+      // vite
+      "dist/**",
+      "public/**",
+      // vitest
+      "coverage/**",
+      // dot files
+      ".*"
     ]
   },
   "formatter": {

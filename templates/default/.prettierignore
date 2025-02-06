@@ -13,7 +13,7 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
-# local env files
+# Local env files
 .env.local
 .env.*.local
 
@@ -27,16 +27,18 @@ yarn.lock
 .vscode
 .history
 
-# dist
-/dist
+# Dot files
+**/.*
 
-# testing
+# Vite
+/dist
+/public
+
+# Vitest
 /coverage
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 
-# release-please
-.release-please-manifest.json
 
 

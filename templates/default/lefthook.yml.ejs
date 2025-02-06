@@ -7,12 +7,12 @@ pre-commit:
     <%_ if (codeLinter === 'biome') { _%>
     biome:
       glob: "*"
-      run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       stage_fixed: true
     <%_ } else if (codeLinter === 'eslint') { _%>
     eslint:
       glob: "*"
-      run: npx eslint --no-error-on-unmatched-pattern --no-color --fix {staged_files}
+      run: npx eslint --no-error-on-unmatched-pattern --no-warn-ignored --fix {staged_files}
       stage_fixed: true
     <%_ } _%>
 
