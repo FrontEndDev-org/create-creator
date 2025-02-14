@@ -17,7 +17,7 @@
     "forceConsistentCasingInFileNames": true,
 
     "lib": ["ES2023", "DOM"],
-    "types": [],
+    "types": ["node"],
     "plugins": [],
     "paths": {
       "@/*": ["./src/*"]
