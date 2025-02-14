@@ -1,6 +1,6 @@
 {
   "name": "create-creator",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "Create a creator - npm create creator",
   "scripts": {
     "prepare": "lefthook install",
