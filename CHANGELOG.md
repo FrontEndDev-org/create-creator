@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.12.0...v2.13.0) (2025-02-14)
+
+
+### Features
+
+* 添加 Node 类型声明 ([d59da47](https://github.com/FrontEndDev-org/create-creator/commit/d59da47f0e0767f115ac88d48cfd7af992e57791))
+
 ## [2.12.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.11.0...v2.12.0) (2025-02-06)
 
 
