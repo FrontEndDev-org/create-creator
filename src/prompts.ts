@@ -142,7 +142,7 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
   // 如果当前 package 还没有发布，则远程版本为空
   if (remoteVersion && localVersion !== remoteVersion) {
     spinner.stop(`New version ${remoteVersion} is available`, 1);
-    const command = ['npm', 'create', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
+    const command = ['npx', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
     throw new ExitError(`Please use \`${command}\` command instead.`, 1);
   }
 
