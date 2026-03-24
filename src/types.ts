@@ -3,203 +3,203 @@ import type * as colors from 'picocolors';
 import type { BUILTIN_DATA_KEY } from './const';
 
 /**
- * Type representing the @clack/prompts module
+ * 表示 @clack/prompts 模块的类型
  * @see https://www.npmjs.com/package/@clack/prompts
  */
 export type Prompts = typeof prompts;
 
 /**
- * Type representing the picocolors module
+ * 表示 picocolors 模块的类型
  * @see https://www.npmjs.com/package/picocolors
  */
 export type Colors = typeof colors;
 
 export type PkgMeta = {
   /**
-   * Package name
+   * 包名称
    */
   name: string;
   /**
-   * Dist tag
+   * 发布标签
    * @default 'latest'
    * @see https://docs.npmjs.com/cli/dist-tag
    */
   distTag?: string;
   /**
-   * NPM registry
+   * NPM 镜像源
    * @default 'https://registry.npmjs.org'
    */
   registry?: string;
 };
 
 /**
- * File write mode options
+ * 文件写入模式选项
  * @enum {string}
  */
 export type WriteMode = 'overwrite' | 'clean' | 'cancel';
 
 /**
- * Context object containing information about the current creation process
+ * 包含当前创建过程信息的上下文对象
  */
 export type CreatorContext = {
   /**
-   * Current working directory
+   * 当前工作目录
    */
   cwd: string;
   /**
-   * Root directory containing templates
+   * 包含模板的根目录
    */
   templatesRoot: string;
   /**
-   * Path to selected template directory
+   * 所选模板目录的路径
    */
   templateRoot: string;
   /**
-   * Names of selected template directories
+   * 所选模板目录的名称
    */
   templateNames: string[];
   /**
-   * Name of selected template
+   * 所选模板的名称
    */
   templateName: string;
   /**
-   * Root directory of project being created
+   * 正在创建的项目的根目录
    */
   projectRoot: string;
   /**
-   * Relative path to project directory
+   * 项目目录的相对路径
    */
   projectPath: string;
   /**
-   * Name of project being created
+   * 正在创建的项目名称
    */
   projectName: string;
   /**
-   * Current write mode (overwrite/clean/cancel)
+   * 当前写入模式 (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
 };
 
 /**
- * Built-in data that is automatically included in template context
+ * 自动包含在模板上下文中的内置数据
  */
 export type CreatorBuiltinData = {
   /**
-   * The creation context
+   * 创建上下文
    */
   [BUILTIN_DATA_KEY]: CreatorContext;
 };
 
 /**
- * Complete template data type combining built-in and custom data
- * @template T - Type of custom data to extend with
+ * 结合内置数据和自定义数据的完整模板数据类型
+ * @template T - 要扩展的自定义数据类型
  */
 export type CreatorData<T> = CreatorBuiltinData & T;
 
 export type OverrideWrite = {
   /**
-   * Whether to disable EJS rendering for EJS files
+   * 是否禁用 EJS 文件的 EJS 渲染
    */
   disableRenderEjs?: boolean;
 
   /**
-   * Specify target file name
+   * 指定目标文件名
    */
   targetFileName?: string;
 
   /**
-   * Whether to disable file writing
-   * When true, other configurations will be ignored
+   * 是否禁用文件写入
+   * 当为 true 时，其他配置将被忽略
    */
   disableWrite?: boolean;
 };
 
 /**
- * Metadata about files being processed
+ * 关于正在处理的文件的元数据
  */
 export type FileMeta = {
   /**
-   * Whether file uses EJS templating
+   * 文件是否使用 EJS 模板
    */
   isEjsFile: boolean;
 
   /**
-   * Root directory of source files
+   * 源文件的根目录
    */
   sourceRoot: string;
   /**
-   * Name of source file
+   * 源文件名称
    */
   sourceFileName: string;
   /**
-   * Relative path to source file
+   * 源文件的相对路径
    */
   sourcePath: string;
   /**
-   * Full path to source file
+   * 源文件的完整路径
    */
   sourceFile: string;
 
   /**
-   * Root directory of target files
+   * 目标文件的根目录
    */
   targetRoot: string;
   /**
-   * Name of target file
+   * 目标文件名称
    */
   targetFileName: string;
   /**
-   * Relative path to target file
+   * 目标文件的相对路径
    */
   targetPath: string;
   /**
-   * Full path to target file
+   * 目标文件的完整路径
    */
   targetFile: string;
 };
 
 export type TemplateOption = {
   /**
-   * Unique identifier for the template option
+   * 模板选项的唯一标识符
    */
   value: string;
   /**
-   * Display name for the template option
+   * 模板选项的显示名称
    */
   label?: string;
   /**
-   * Additional description or hint about the template
+   * 关于模板的附加描述或提示
    */
   hint?: string;
 };
 
 /**
- * Configuration options for the creator
- * @template T - Type of custom data to extend with
+ * 创建器的配置选项
+ * @template T - 要扩展的自定义数据类型
  */
 export type CreatorOptions<T> = {
   /**
-   * Current working directory (default: process.cwd())
+   * 当前工作目录 (默认: process.cwd())
    */
   cwd?: string;
   /**
-   * Path to project directory
+   * 项目目录的路径
    */
   projectPath?: string;
   /**
-   * Root directory containing templates
+   * 包含模板的根目录
    */
   templatesRoot: string;
   /**
-   * Convert creation context to template options
-   * @param context - The creation context containing information about the current process
-   * @returns Array of template options or promise resolving to array of template options
+   * 将创建上下文转换为模板选项
+   * @param context - 包含当前过程信息的创建上下文
+   * @returns 模板选项数组或解析为模板选项数组的 Promise
    */
   toTemplateOptions?: (context: CreatorContext) => TemplateOption[] | Promise<TemplateOption[]>;
   /**
-   * Extend template data with custom properties
-   * @param context - The creation context containing information about the current process
-   * @returns Extended template data or promise resolving to extended template data
+   * 使用自定义属性扩展模板数据
+   * @param context - 包含当前过程信息的创建上下文
+   * @returns 扩展的模板数据或解析为扩展模板数据的 Promise
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
 };

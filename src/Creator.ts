@@ -15,8 +15,8 @@ import type { CreatorContext, CreatorData, CreatorOptions, FileMeta, OverrideWri
 import { isDirectory } from './utils';
 
 /**
- * Main class for handling project creation
- * @template T - Type of custom data to extend with
+ * 处理项目创建的主要类
+ * @template T - 要扩展的自定义数据类型
  */
 export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   before: [context: CreatorContext];
@@ -73,7 +73,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   async #check() {
     const { context, options } = this;
 
-    prompts.log.warn(`The project directory is: ${colors.yellowBright(context.projectRoot)}`);
+    prompts.log.warn(`项目目录是: ${colors.yellowBright(context.projectRoot)}`);
 
     context.writeMode = await selectWriteMode(context.projectRoot);
 
@@ -84,7 +84,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         await fse.emptyDir(context.projectRoot);
         break;
       case 'cancel':
-        throw new ExitError('Operation cancelled', 0);
+        throw new ExitError('操作已取消', 0);
       default:
         break;
     }
@@ -95,7 +95,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     const externalData = await options.extendData?.call(null, context);
 
     if (externalData !== undefined && BUILTIN_DATA_KEY in externalData) {
-      throw new ExitError(`Extended data cannot contain the internal key name "${BUILTIN_DATA_KEY}"`, 1);
+      throw new ExitError(`扩展数据不能包含内部键名 "${BUILTIN_DATA_KEY}"`, 1);
     }
 
     this.data = {
@@ -114,15 +114,12 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify selected template contains files
     if (paths.length === 0) {
-      throw new ExitError(
-        `Template "${context.templateName}" is empty - add project files to ${context.templateRoot}`,
-        1,
-      );
+      throw new ExitError(`模板 "${context.templateName}" 是空的，请在 ${context.templateRoot} 添加项目文件`, 1);
     }
 
     const spinner = prompts.spinner();
     let files = 0;
-    spinner.start('Generating project files ...');
+    spinner.start('正在生成项目文件 ...');
     const onWritten = async (fileMeta: FileMeta) => {
       files++;
       spinner.message(`${colors.gray('+')} ${colors.green(fileMeta.targetPath)}`);
@@ -133,11 +130,11 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     this.off('written', onWritten);
 
     if (err) {
-      spinner.stop('Failed to generate project files', 1);
+      spinner.stop('生成项目文件失败', 1);
       throw new ExitError(err.message, 1);
     }
 
-    spinner.stop(`Generated project ${files} files`, 0);
+    spinner.stop(`已生成项目 ${files} 个文件`, 0);
   }
 
   async #generateWriteFiles(paths: string[]) {
@@ -205,29 +202,23 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // Verify templates root directory exists and is accessible
     if (isDirectory(context.templatesRoot) === false) {
-      throw new ExitError(
-        `Invalid templates directory "${context.templatesRoot}" - create a templates folder containing your project templates`,
-        1,
-      );
+      throw new ExitError(`无效的模板目录 "${context.templatesRoot}"，请创建一个包含项目模板的模板文件夹`, 1);
     }
 
     // Scan templates root directory for valid template folders
     const templateNames = fs.readdirSync(context.templatesRoot).filter((name) => {
       const fullPath = path.join(context.templatesRoot, name);
       return (
-        !name.startsWith('.') && // Skip hidden files/directories
-        !name.startsWith('_') && // Skip underscore prefixed files/directories
-        fs.statSync(fullPath).isDirectory() // Only include actual directories
+        !name.startsWith('.') && // 跳过隐藏文件/目录
+        !name.startsWith('_') && // 跳过下划线前缀的文件/目录
+        fs.statSync(fullPath).isDirectory() // 只包含实际目录
       );
     });
     context.templateNames = templateNames;
 
     // Verify templates directory contains at least one valid template
     if (templateNames.length === 0) {
-      throw new ExitError(
-        `No templates found in "${context.templatesRoot}" - add template folders containing your project files`,
-        1,
-      );
+      throw new ExitError(`在 "${context.templatesRoot}" 中未找到模板，请添加包含项目文件的模板文件夹`, 1);
     }
 
     if (templateNames.length === 1 && !options.toTemplateOptions) {

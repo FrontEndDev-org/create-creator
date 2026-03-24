@@ -3,16 +3,16 @@
  */
 
 /**
- * package.json name
+ * package.json 名称
  */
 declare const PKG_NAME: string;
 
 /**
- * package.json version
+ * package.json 版本
  */
 declare const PKG_VERSION: string;
 
 /**
- * package.json description
+ * package.json 描述
  */
 declare const PKG_DESCRIPTION: string;
