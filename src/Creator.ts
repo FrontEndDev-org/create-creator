@@ -40,8 +40,8 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
   #writeMW: MiddleWare<[meta: FileMeta, data: CreatorData<T>], OverrideWrite>;
 
   /**
-   * Create a new Creator instance
-   * @param {CreatorOptions<T>} options - Configuration options
+   * 创建一个新的 Creator 实例
+   * @param {CreatorOptions<T>} options - 配置选项
    */
   constructor(private readonly options: CreatorOptions<T>) {
     super();

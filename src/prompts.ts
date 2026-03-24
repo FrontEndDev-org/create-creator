@@ -40,7 +40,7 @@ export async function selectNpmRegistry(
   registries: { value: string; label: string }[] = [
     {
       value: 'https://registry.npmjs.org',
-      label: 'npm official',
+      label: 'npm 官方',
     },
     {
       value: 'https://registry.npmmirror.com',

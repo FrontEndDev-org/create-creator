@@ -28,6 +28,6 @@ export class MiddleWare<I extends unknown[], O> {
     if (hooks.length === 0) return undefined;
     if (hooks.length === 1) return hooks[0].callback.apply(null, inputs);
 
-    throw new Error(`Multiple hooks found for file ${pth}`);
+    throw new Error(`为文件 ${pth} 找到了多个钩子`);
   }
 }
