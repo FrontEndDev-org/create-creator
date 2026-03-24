@@ -47,11 +47,6 @@ export default defineConfig((env) => {
             entryFileNames: '[name].mjs',
             chunkFileNames: '[name].mjs',
           },
-          {
-            format: 'cjs',
-            entryFileNames: '[name].cjs',
-            chunkFileNames: '[name].cjs',
-          },
         ],
       },
     },
