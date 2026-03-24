@@ -1,5 +1,3 @@
-[➡️ English](./README-en.md)
-
 # create-creator
 
 [![code-review](https://github.com/FrontEndDev-org/create-creator/actions/workflows/code-review.yml/badge.svg)](https://github.com/FrontEndDev-org/create-creator/actions/workflows/code-review.yml)
@@ -32,24 +30,30 @@ Ok to proceed? (y)
 
 ┌   create-creator@2.0.0
 │
-●  Create a creator - npm create creator
+●  创建一个脚手架工具 - npm create creator
 │
-▲  The project directory is: /path/to/my-creator
+◆  Node.js 版本 22 与 18 兼容
 │
-◇  Select node version
+◇  当前使用的是最新版本
+│
+▲  项目目录是: /path/to/my-creator
+│
+◇  选择 Node 版本
 │  v22.x
 │
-◇  Select npm registry
-│  npm official
+◇  选择 npm 镜像源
+│  npm 官方
 │
-◇  Select code linter
-│  biome
+◇  选择代码检查工具
+│  eslint
 │
-◆  Git repository initialized
+◇  已生成项目 26 个文件
 │
-◆  The project has been created successfully!
+◇  Git 仓库初始化成功
 │
-◆  cd my-creator to start your coding journey
+◆  项目已成功创建
+│
+◆  cd my-creator 开始你的编码之旅
 │
 └  🎉🎉🎉
 
@@ -261,93 +265,82 @@ class Creator<T extends Record<string, unknown>> {
 
 ### CreatorOptions<T>
 ```ts
+
 /**
- * Configuration options for the creator
- * @template T - Type of custom data to extend with
+ * 创建器的配置选项
+ * @template T - 要扩展的自定义数据类型
  */
 export type CreatorOptions<T> = {
   /**
-   * Current working directory (default: process.cwd())
+   * 当前工作目录 (默认: process.cwd())
    */
   cwd?: string;
   /**
-   * Path to project directory
+   * 项目目录的路径
    */
   projectPath?: string;
   /**
-   * Root directory containing templates
+   * 包含模板的根目录
    */
   templatesRoot: string;
   /**
-   * Convert creation context to template options
-   * @param context - The creation context containing information about the current process
-   * @returns Array of template options or promise resolving to array of template options
+   * 将创建上下文转换为模板选项
+   * @param context - 包含当前过程信息的创建上下文
+   * @returns 模板选项数组或解析为模板选项数组的 Promise
    */
   toTemplateOptions?: (context: CreatorContext) => TemplateOption[] | Promise<TemplateOption[]>;
   /**
-   * Extend template data with custom properties
+   * 使用自定义属性扩展模板数据
+   * @param context - 包含当前过程信息的创建上下文
+   * @returns 扩展的模板数据或解析为扩展模板数据的 Promise
    */
   extendData?: (context: CreatorContext) => T | Promise<T>;
-  /**
-   * Check for updates
-   */
-  checkUpdate?: CheckPkgUpdate & { version: string };
-  /**
-   * Check Node.js version
-   */
-  checkNodeVersion?: number;
 };
+
 ```
 
 ### `FileMeta`
 ```ts
 /**
- * Metadata about files being processed
+ * 关于正在处理的文件的元数据
  */
 export type FileMeta = {
   /**
-   * Whether file uses EJS templating
+   * 文件是否使用 EJS 模板
    */
   isEjsFile: boolean;
-  /**
-   * Whether file uses underscore prefix
-   */
-  isUnderscoreFile: boolean;
-  /**
-   * Whether file uses dot prefix
-   */
-  isDotFile: boolean;
 
   /**
-   * Root directory of source files
+   * 源文件的根目录
    */
   sourceRoot: string;
   /**
-   * Name of source file
+   * 源文件名称
    */
   sourceFileName: string;
   /**
-   * Relative path to source file
+   * 源文件的相对路径
    */
   sourcePath: string;
   /**
-   * Full path to source file
+   * 源文件的完整路径
    */
   sourceFile: string;
+
   /**
-   * Root directory of target files
+   * 目标文件的根目录
    */
   targetRoot: string;
   /**
-   * Name of target file
+   * 目标文件名称
    */
   targetFileName: string;
   /**
-   * Relative path to target file
+   * 目标文件的相对路径
    */
   targetPath: string;
   /**
-   * Full path to target file
+   * 目标文件的完整路径
    */
   targetFile: string;
 };
@@ -355,23 +348,20 @@ export type FileMeta = {
 
 ### `OverrideWrite`
 ```ts
-/**
- * Options to override default file writing behavior
- */
 export type OverrideWrite = {
   /**
-   * Whether to disable EJS rendering for EJS files
+   * 是否禁用 EJS 文件的 EJS 渲染
    */
   disableRenderEjs?: boolean;
 
   /**
-   * Specify target file name
+   * 指定目标文件名
    */
   targetFileName?: string;
 
   /**
-   * Whether to disable file writing
-   * When true, other configurations will be ignored
+   * 是否禁用文件写入
+   * 当为 true 时，其他配置将被忽略
    */
   disableWrite?: boolean;
 };
@@ -380,43 +370,43 @@ export type OverrideWrite = {
 ### `CreatorContext`
 ```ts
 /**
- * Context object containing information about the current creation process
+ * 包含当前创建过程信息的上下文对象
  */
 export type CreatorContext = {
   /**
-   * Current working directory
+   * 当前工作目录
    */
   cwd: string;
   /**
-   * Root directory containing templates
+   * 包含模板的根目录
    */
   templatesRoot: string;
   /**
-   * Path to selected template directory
+   * 所选模板目录的路径
    */
   templateRoot: string;
   /**
-   * Names of selected template directories
+   * 所选模板目录的名称
    */
   templateNames: string[];
   /**
-   * Name of selected template
+   * 所选模板的名称
    */
   templateName: string;
   /**
-   * Root directory of project being created
+   * 正在创建的项目的根目录
    */
   projectRoot: string;
   /**
-   * Relative path to project directory
+   * 项目目录的相对路径
    */
   projectPath: string;
   /**
-   * Name of project being created
+   * 正在创建的项目名称
    */
   projectName: string;
   /**
-   * Current write mode (overwrite/clean/cancel)
+   * 当前写入模式 (overwrite/clean/cancel)
    */
   writeMode: WriteMode;
 };
@@ -425,20 +415,15 @@ export type CreatorContext = {
 ### `CreatorData<T>`
 ```ts
 /**
- * Complete template data type combining built-in and custom data
- * @template T - Type of custom data to extend with
+ * 结合内置数据和自定义数据的完整模板数据类型
+ * @template T - 要扩展的自定义数据类型
  */
-export type CreatorData<T> = {
-  /**
-   * The creation context
-   */
-  ctx: CreatorContext;
-} & T;
+export type CreatorData<T> = CreatorBuiltinData & T;
 ```
 
-### ExitError 类
+### CreateError 类
 ```ts
-class ExitError extends Error {
+class CreateError extends Error {
   exitCode: number;
   constructor(message: string);
 }
