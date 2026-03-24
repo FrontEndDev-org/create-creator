@@ -24,7 +24,7 @@ export async function selectTemplate(templates: string[] | { value: string; labe
   );
 }
 
-export async function selectNodeVersion(versions: number[] = [22, 20, 18, 16, 14]) {
+export async function selectNodeVersion(versions: number[] = [24, 22, 20, 18]) {
   return promptSafe(
     prompts.select({
       message: '选择 Node 版本',
