@@ -1,6 +1,9 @@
+import path from 'node:path';
+
 export const pkgName = PKG_NAME;
 export const pkgVersion = PKG_VERSION;
 export const pkgDescription = PKG_DESCRIPTION;
+export const pkgDirname = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 
 export const EJS_FILE_SUFFIX = '.ejs';
 export const EJS_FILE_REGEX = /\.ejs$/i;

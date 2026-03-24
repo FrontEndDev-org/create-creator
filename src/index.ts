@@ -1,7 +1,7 @@
 export { createCLI } from './cli';
 export { pkgName, pkgVersion } from './const';
 export { Creator } from './Creator';
-export { CreateError as ExitError } from './CreateError';
+export { CreateError } from './CreateError';
 export {
   colors,
   initGitRepo,

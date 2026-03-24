@@ -1,6 +1,6 @@
 import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
-import * as colors from 'picocolors';
+import colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
 import { CreateError } from './CreateError';
 import { IGNORE_NAMES } from './const';
@@ -44,7 +44,7 @@ export async function selectNpmRegistry(
     },
     {
       value: 'https://registry.npmmirror.com',
-      label: 'npmmirror',
+      label: 'npm 淘宝镜像',
     },
   ],
 ) {
@@ -82,7 +82,7 @@ export async function selectWriteMode(cwd: string, ignoreNames = IGNORE_NAMES): 
 
   return promptSafe(
     prompts.select({
-      message: colors.bold(colors.red('该目录不为空。请选择操作')),
+      message: colors.bold(colors.red('目标目录不为空，请选择操作')),
       options: [
         {
           value: 'cancel',

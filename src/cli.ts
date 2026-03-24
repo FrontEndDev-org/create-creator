@@ -1,7 +1,7 @@
 import path from 'node:path/posix';
 import process from 'node:process';
 import { Creator } from './Creator';
-import { pkgDescription, pkgName, pkgVersion } from './const';
+import { pkgDescription, pkgDirname, pkgName, pkgVersion } from './const';
 import {
   checkNodeVersion,
   checkUpdate,
@@ -16,7 +16,7 @@ import {
 export async function createCLI() {
   const creator = new Creator({
     projectPath: process.argv[2],
-    templatesRoot: path.join(__dirname, '../templates'),
+    templatesRoot: path.join(pkgDirname, 'templates'),
     async extendData({ projectName }) {
       const nodeVersion = await selectNodeVersion();
       const npmRegistry = await selectNpmRegistry();
