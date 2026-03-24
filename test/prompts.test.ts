@@ -96,7 +96,7 @@ it('成功初始化git仓库', async () => {
       start: vi.fn(),
       stop: vi.fn(),
       message: vi.fn(),
-    });
+    } as unknown as prompts.SpinnerResult);
     await initGitRepo(cwd);
     expect(spinnerSpy).toHaveBeenCalled();
     expect(fs.existsSync(path.join(cwd, '.git'))).toBe(true);
