@@ -6,9 +6,9 @@ it('should export pkgName and pkgVersion', () => {
   expect(index.pkgVersion).toBeDefined();
 });
 
-it('should export Creator and ExitError', () => {
+it('should export Creator and CreateError', () => {
   expect(index.Creator).toBeDefined();
-  expect(index.ExitError).toBeDefined();
+  expect(index.CreateError).toBeDefined();
 });
 
 it('should export prompts functions', () => {

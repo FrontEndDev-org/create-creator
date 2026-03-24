@@ -31,7 +31,7 @@ it('should select node version', async () => {
   const version = await selectNodeVersion();
   expect(version).toBe(18);
   expect(prompts.select).toHaveBeenCalledWith({
-    message: 'Select node version',
+    message: '选择 Node 版本',
     options: expect.arrayContaining([expect.objectContaining({ value: 22 }), expect.objectContaining({ value: 20 })]),
   });
 });
@@ -42,7 +42,7 @@ it('should select npm registry', async () => {
   const registry = await selectNpmRegistry();
   expect(registry).toBe('https://registry.npmjs.org');
   expect(prompts.select).toHaveBeenCalledWith({
-    message: 'Select npm registry',
+    message: '选择 npm 镜像源',
     options: expect.arrayContaining([
       expect.objectContaining({ value: 'https://registry.npmjs.org' }),
       expect.objectContaining({ value: 'https://registry.npmmirror.com' }),
@@ -56,7 +56,7 @@ it('should select code linter', async () => {
   const codeLinter = await selectCodeLinter();
   expect(codeLinter).toBe('eslint');
   expect(prompts.select).toHaveBeenCalledWith({
-    message: 'Select code linter',
+    message: '选择代码检查工具',
     options: expect.arrayContaining([
       expect.objectContaining({ value: 'eslint' }),
       expect.objectContaining({ value: 'biome' }),
@@ -116,7 +116,7 @@ describe('Node版本检查', () => {
 
   it('当当前版本小于要求版本时应返回 false', () => {
     vi.stubGlobal('process', { version: 'v14.0.0' });
-    expect(() => checkNodeVersion(16)).toThrowError('old');
+    expect(() => checkNodeVersion(16)).toThrowError('您的 Node.js 版本较旧');
   });
 
   it('应该处理带有额外字符的版本字符串', () => {
