@@ -112,7 +112,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
       dot: true,
     });
 
-    // Verify selected template contains files
+    // 验证选定的模板是否包含文件
     if (paths.length === 0) {
       throw new ExitError(`模板 "${context.templateName}" 是空的，请在 ${context.templateRoot} 添加项目文件`, 1);
     }
@@ -200,12 +200,12 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     await this.emit('before', context);
 
-    // Verify templates root directory exists and is accessible
+    // 验证模板根目录是否存在且可访问
     if (isDirectory(context.templatesRoot) === false) {
       throw new ExitError(`无效的模板目录 "${context.templatesRoot}"，请创建一个包含项目模板的模板文件夹`, 1);
     }
 
-    // Scan templates root directory for valid template folders
+    // 扫描模板根目录以获取有效的模板文件夹
     const templateNames = fs.readdirSync(context.templatesRoot).filter((name) => {
       const fullPath = path.join(context.templatesRoot, name);
       return (
@@ -216,7 +216,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     });
     context.templateNames = templateNames;
 
-    // Verify templates directory contains at least one valid template
+    // 验证模板目录是否至少包含一个有效的模板
     if (templateNames.length === 0) {
       throw new ExitError(`在 "${context.templatesRoot}" 中未找到模板，请添加包含项目文件的模板文件夹`, 1);
     }
