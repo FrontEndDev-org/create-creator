@@ -1,6 +1,6 @@
 {
   "name": "create-creator",
-  "version": "2.13.0",
+  "version": "2.14.0",
   "description": "创建一个脚手架工具 - npm create creator",
   "scripts": {
     "prepare": "lefthook install",
