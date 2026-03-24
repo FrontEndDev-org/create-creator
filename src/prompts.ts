@@ -2,7 +2,7 @@ import * as prompts from '@clack/prompts';
 import { glob } from 'glob';
 import * as colors from 'picocolors';
 import { tryFlatten } from 'try-flatten';
-import { ExitError } from './ExitError';
+import { CreateError } from './CreateError';
 import { IGNORE_NAMES } from './const';
 import type { PkgMeta, WriteMode } from './types';
 import { checkPkgVersion, execCommand } from './utils';
@@ -11,7 +11,7 @@ export { colors, prompts };
 
 export async function promptSafe<T>(promise: Promise<T | symbol>) {
   const r = await promise;
-  if (prompts.isCancel(r)) throw new ExitError('操作已取消', 0);
+  if (prompts.isCancel(r)) throw new CreateError('操作已取消', 0);
   return r;
 }
 
@@ -108,12 +108,12 @@ export async function initGitRepo(cwd: string) {
   const [err, { stdout, stderr, exitCode }] = await execCommand('git init', { cwd });
 
   if (err) {
-    spinner.stop('Git 仓库初始化失败', exitCode);
+    spinner.stop('Git 仓库初始化失败');
     prompts.log.error(stderr);
-    throw new ExitError(err.message, 1);
+    throw new CreateError(err.message, 1);
   }
 
-  spinner.stop('Git 仓库初始化成功', 0);
+  spinner.stop('Git 仓库初始化成功');
 }
 
 export function checkNodeVersion(requiredVersion: number) {
@@ -121,7 +121,7 @@ export function checkNodeVersion(requiredVersion: number) {
   const adapted = currentVersion >= requiredVersion;
 
   if (!adapted) {
-    throw new ExitError(`您的 Node.js 版本较旧，请升级到 ${requiredVersion} 或更高版本`, 1);
+    throw new CreateError(`您的 Node.js 版本较旧，请升级到 ${requiredVersion} 或更高版本`, 1);
   }
 
   prompts.log.success(`Node.js 版本 ${currentVersion} 与 ${requiredVersion} 兼容`);
@@ -135,16 +135,16 @@ export async function checkUpdate(options: PkgMeta & { version: string; projectP
   const [err, remoteVersion] = await tryFlatten(checkPkgVersion({ name, distTag, registry }));
 
   if (err) {
-    spinner.stop('检查更新失败', 1);
-    throw new ExitError(`检查更新失败: ${err.message}`, 1);
+    spinner.stop('检查更新失败');
+    throw new CreateError(`检查更新失败: ${err.message}`, 1);
   }
 
   // 如果当前 package 还没有发布，则远程版本为空
   if (remoteVersion && localVersion !== remoteVersion) {
-    spinner.stop(`有新版本 ${remoteVersion} 可用`, 1);
+    spinner.stop(`有新版本 ${remoteVersion} 可用`);
     const command = ['npx', `${name}@${distTag}`, projectPath].filter(Boolean).join(' ');
-    throw new ExitError(`请使用 \`${command}\` 命令。`, 1);
+    throw new CreateError(`请使用 \`${command}\` 命令。`, 1);
   }
 
-  spinner.stop('当前使用的是最新版本', 0);
+  spinner.stop('当前使用的是最新版本');
 }

@@ -6,7 +6,7 @@ import ejs from 'ejs';
 import fse from 'fs-extra';
 import { glob } from 'glob';
 import { tryFlatten } from 'try-flatten';
-import { ExitError } from './ExitError';
+import { CreateError } from './CreateError';
 import { MiddleWare, type MiddleWareInterceptor } from './MiddleWare';
 import { TypedEvents } from './TypedEvents';
 import { BUILTIN_DATA_KEY, EJS_FILE_REGEX, EJS_FILE_SUFFIX } from './const';
@@ -84,7 +84,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
         await fse.emptyDir(context.projectRoot);
         break;
       case 'cancel':
-        throw new ExitError('操作已取消', 0);
+        throw new CreateError('操作已取消', 0);
       default:
         break;
     }
@@ -95,7 +95,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     const externalData = await options.extendData?.call(null, context);
 
     if (externalData !== undefined && BUILTIN_DATA_KEY in externalData) {
-      throw new ExitError(`扩展数据不能包含内部键名 "${BUILTIN_DATA_KEY}"`, 1);
+      throw new CreateError(`扩展数据不能包含内部键名 "${BUILTIN_DATA_KEY}"`, 1);
     }
 
     this.data = {
@@ -114,7 +114,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // 验证选定的模板是否包含文件
     if (paths.length === 0) {
-      throw new ExitError(`模板 "${context.templateName}" 是空的，请在 ${context.templateRoot} 添加项目文件`, 1);
+      throw new CreateError(`模板 "${context.templateName}" 是空的，请在 ${context.templateRoot} 添加项目文件`, 1);
     }
 
     const spinner = prompts.spinner();
@@ -130,11 +130,11 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
     this.off('written', onWritten);
 
     if (err) {
-      spinner.stop('生成项目文件失败', 1);
-      throw new ExitError(err.message, 1);
+      spinner.stop('生成项目文件失败');
+      throw new CreateError(err.message, 1);
     }
 
-    spinner.stop(`已生成项目 ${files} 个文件`, 0);
+    spinner.stop(`已生成项目 ${files} 个文件`);
   }
 
   async #generateWriteFiles(paths: string[]) {
@@ -202,7 +202,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // 验证模板根目录是否存在且可访问
     if (isDirectory(context.templatesRoot) === false) {
-      throw new ExitError(`无效的模板目录 "${context.templatesRoot}"，请创建一个包含项目模板的模板文件夹`, 1);
+      throw new CreateError(`无效的模板目录 "${context.templatesRoot}"，请创建一个包含项目模板的模板文件夹`, 1);
     }
 
     // 扫描模板根目录以获取有效的模板文件夹
@@ -218,7 +218,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     // 验证模板目录是否至少包含一个有效的模板
     if (templateNames.length === 0) {
-      throw new ExitError(`在 "${context.templatesRoot}" 中未找到模板，请添加包含项目文件的模板文件夹`, 1);
+      throw new CreateError(`在 "${context.templatesRoot}" 中未找到模板，请添加包含项目文件的模板文件夹`, 1);
     }
 
     if (templateNames.length === 1 && !options.toTemplateOptions) {
@@ -244,7 +244,7 @@ export class Creator<T extends Record<string, unknown>> extends TypedEvents<{
 
     prompts.cancel(err.message);
 
-    if (err instanceof ExitError) {
+    if (err instanceof CreateError) {
       process.exit(err.exitCode);
     } else {
       process.exit(1);
