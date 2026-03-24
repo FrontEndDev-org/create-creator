@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.14.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.13.0...v2.14.0) (2026-03-24)
+
+
+### Features
+
+* 不再支持 cjs ([e4758b9](https://github.com/FrontEndDev-org/create-creator/commit/e4758b9fcf957e63fb375cc21a8567483f7e5e87))
+
+
+### Bug Fixes
+
+* **build:** 修复 npm create 命令的执行方式 ([0a998de](https://github.com/FrontEndDev-org/create-creator/commit/0a998def193d988195ca7215b03bb8641bedbfd4))
+
 ## [2.13.0](https://github.com/FrontEndDev-org/create-creator/compare/v2.12.0...v2.13.0) (2025-02-14)
 
 
